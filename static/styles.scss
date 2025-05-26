@@ -1,0 +1,103 @@
+// Color variables
+$primary-color: #8A6240;
+$primary-hover-color: #4D2D18;
+$success-color: darkslategrey;
+$success-hover-color: #102820;
+$title-color: #4D2D18;
+$bg-color: darkslategrey;
+$bg-content-color: #CABA9C;
+$table-text-color: #CABA9C;
+
+// styling
+body {
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    margin: 0;
+    padding: 0;
+    background-color: $bg-color;
+    color: $bg-content-color;
+    text-align: center;
+
+    h1 {
+        padding-top: 20px;
+    }
+
+    h2 {
+        font-style: italic;
+        padding-top: 0;
+        padding-bottom: 10px;
+    }
+}
+
+.content {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 0px 30px 30px 30px;
+    background-color: $bg-content-color;
+    border-radius: 30px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+
+    h1 {
+        color: $title-color;
+    }
+
+    h4 {
+        color: $success-hover-color;
+    }
+
+    table {
+        width: 100%;
+        margin-top: 20px;
+        border-collapse: collapse;
+        border-spacing: 0; // Eliminates spacing between cells
+        border-radius: 30px; // Rounds the table's outer borders
+        overflow: hidden;
+
+        th,
+        td {
+            padding: 10px;
+            border: 1px solid $bg-content-color;
+            background-color: $primary-color;
+            color: white;
+        }
+
+        th {
+            color: $primary-hover-color;
+        }
+    }
+
+    a {
+        display: inline-block;
+        padding: 8px 16px;
+        margin: 5px;
+        border-radius: 20px;
+        background-color: $primary-hover-color;
+        color: #fff;
+        text-decoration: none;
+        transition: background-color 0.3s ease;
+
+        &:hover {
+            background-color: black;
+        }
+    }
+
+    input {
+        padding: 10px;
+        margin: 20px 5px 5px 5px;
+        border: none;
+        border-radius: 30px;
+        padding: 15px 30px; // Increase the padding to make it bigger
+        font-size: 18px; // Increase the font size for better readability
+    }
+
+    #btn_add {
+        background-color: $success-color;
+        color: #fff;
+        cursor: pointer;
+        font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+
+        &:hover {
+            background-color: $success-hover-color;
+        }
+    }
+}
