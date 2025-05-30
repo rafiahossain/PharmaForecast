@@ -3,6 +3,9 @@ from flask import Flask, render_template, redirect, request
 from flask_scss import Scss
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+# To upload files in data entry page
+import os
+from werkzeug.utils import secure_filename
 
 # create the app
 app = Flask(__name__)
@@ -73,6 +76,44 @@ def edit(id:int):
     else: # create a new edit webpage
         return render_template('edit.html',task=task)
 
+######################################
+
+# Upload File in Data entry page
+
+######################################
+# Configure upload folder
+UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB max size
+
+@app.route("/upload-data", methods=["POST"])
+def upload_data():
+    goods_file = request.files.get("goods_file")
+    consumption_file = request.files.get("consumption_file")
+
+    if not goods_file or not consumption_file:
+        return "Both files are required!", 400
+
+    # Secure and save the files
+    goods_filename = secure_filename(goods_file.filename)
+    consumption_filename = secure_filename(consumption_file.filename)
+
+    goods_path = os.path.join(app.config['UPLOAD_FOLDER'], goods_filename)
+    consumption_path = os.path.join(app.config['UPLOAD_FOLDER'], consumption_filename)
+
+    goods_file.save(goods_path)
+    consumption_file.save(consumption_path)
+
+    # Optional: add flash messages or redirect to another page
+    return f"Files uploaded successfully:<br>Goods File: {goods_filename}<br>Consumption File: {consumption_filename}"
+
+
+######################################
+
+# Web pages and routing
+
+######################################
 @app.route("/consumption")
 def consumption():
     return render_template("dashboard_consumption.html")
