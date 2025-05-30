@@ -1,14 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{url_for('static', filename="styles.css")}}">
-    {% block head %}{% endblock %}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  <title>{% block title %}PharmaForecast{% endblock %}</title>
+  {% block head %}{% endblock %}
 </head>
 <body>
-    <h1>toado</h1>
-    <h2>Task done right.</h2>
-    {% block body %}{% endblock %}
+  <div class="layout">
+    <nav class="sidenav">
+      <h2 class="sidebar-title">💊 PharmaForecast</h2>
+      <ul class="nav-links">
+        <li><a href="/">🏠 Home (Tasks)</a></li>
+        <li><a href="/consumption">📊 Consumption Overview</a></li>
+        <li><a href="/suppliers">🏭 Supplier Trends</a></li>
+        <li><a href="/forecasting">🔮 Forecasting Insights</a></li>
+        <li><a href="/data-entry">📝 Data Entry</a></li>
+        <li><a href="/dataset">📄 Dataset</a></li>
+        <li><a href="/performance">📈 Performance</a></li>
+      </ul>
+    </nav>
+
+    <main class="content">
+      {% block body %}{% endblock %}
+    </main>
+  </div>
+
+  <footer>
+  <div>
+    Demand Forecasting for Supply Chain Risk Management<br>
+    Created by Rafia H
+  </div>
+</footer>
 </body>
 </html>

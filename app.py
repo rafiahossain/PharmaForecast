@@ -73,6 +73,30 @@ def edit(id:int):
     else: # create a new edit webpage
         return render_template('edit.html',task=task)
 
+@app.route("/consumption")
+def consumption():
+    return render_template("dashboard_consumption.html")
+
+@app.route("/suppliers")
+def suppliers():
+    return render_template("dashboard_suppliers.html")
+
+@app.route("/forecasting")
+def forecasting():
+    return render_template("dashboard_forecasting.html")
+
+@app.route("/data-entry")
+def data_entry():
+    return render_template("data_entry.html")
+
+@app.route("/dataset")
+def dataset():
+    return render_template("dataset.html")
+
+@app.route("/performance")
+def performance():
+    return render_template("performance.html")
+
 # RUNNER and DEBUGGER
 # Keep Flask updating itself
 if __name__ == "__main__":      
