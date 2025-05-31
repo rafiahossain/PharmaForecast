@@ -8,6 +8,9 @@ env/
 # Flask instance and DB
 instance/
 pharmaDB.db
+uploads/
+Consumption_Month_Item_Wise.xlsx
+GRN_DATA.xlsx
 .env
 
 # IDE/project configs
