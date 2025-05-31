@@ -3,6 +3,52 @@
 {% block title %}Dataset Overview{% endblock %}
 
 {% block body %}
-  <h1>Dataset Sample</h1>
-  <p>About the dataset.</p>
+  <h1>Datasets</h1>
+<div class="dataset-container">
+  <div class="dataset-box">
+    <h3>1. Consumption Report Item Wise</h3>
+    <p><strong>Period:</strong> 01/01/2024 – 31/05/2025</p>
+    <p><strong>Purpose:</strong> Time Series Analysis of Drug Consumption</p>
+    <ul>
+      <li><strong>Key Characteristics:</strong>
+        <ul>
+          <li>Item-wise drug usage with timestamps</li>
+          <li>Fields: Date, Drug Code/Name, Quantity, Unit</li>
+          <li>Daily or monthly granularity</li>
+        </ul>
+      </li>
+      <li><strong>Use in Time Series Analysis:</strong>
+        <ul>
+          <li>Forecast drug demand (ARIMA, Prophet, LSTM)</li>
+          <li>Identify trends, seasonal spikes, and anomalies</li>
+          <li>Improve inventory management and reduce stockouts</li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <div class="dataset-box">
+    <h3>2. GRN Register (Supplier Wise)</h3>
+    <p><strong>Period:</strong> 01/01/2024 – 31/05/2025</p>
+    <p><strong>Purpose:</strong> Supply Chain Risk Management (SCRM)</p>
+    <ul>
+      <li><strong>Key Characteristics:</strong>
+        <ul>
+          <li>Logs of goods received from suppliers</li>
+          <li>Fields: GRN Date, Supplier, Item, Quantity, Delay, PO</li>
+          <li>Supplier-level delivery performance</li>
+        </ul>
+      </li>
+      <li><strong>Use in SCRM:</strong>
+        <ul>
+          <li>Track supplier delays or incomplete deliveries</li>
+          <li>Correlate supply with consumption patterns</li>
+          <li>Identify supply risks or bottlenecks</li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+</div>
+
+
 {% endblock %}

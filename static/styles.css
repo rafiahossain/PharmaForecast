@@ -67,8 +67,52 @@ body h2 {
 .content h1 {
   color: #bcb1d4;
 }
+.content h2 {
+  color: #4cc8f2;
+}
 .content h4 {
   color: #061d5d;
+}
+.content .dataset-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+  font-family: Arial, sans-serif;
+  padding: 2rem;
+  flex-wrap: nowrap;
+}
+.content .dataset-container .dataset-box {
+  flex: 1;
+  min-width: 0;
+  background-color: #54469b;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  color: #f4f6f8;
+}
+.content .dataset-container .dataset-box h3 {
+  margin-top: 0;
+  color: #4cc8f2;
+}
+.content .dataset-container .dataset-box ul {
+  margin: 1rem 0;
+  padding-left: 1.25rem;
+}
+.content .dataset-container .dataset-box ul ul {
+  padding-left: 1.25rem;
+  margin-top: 0.5rem;
+}
+.content .dataset-container .dataset-box p {
+  margin: 0.5rem 0;
+  text-align: justify;
+}
+.content .dataset-container .dataset-box li {
+  text-align: justify;
+}
+@media (max-width: 768px) {
+  .content .dataset-container {
+    flex-direction: column;
+  }
 }
 .content table {
   width: 100%;
@@ -115,19 +159,32 @@ body h2 {
   background-color: #bcb1d4;
 }
 .content input {
-  padding: 10px;
   margin: 20px 5px 5px 5px;
   border: none;
   border-radius: 30px;
   padding: 15px 30px;
   font-size: 18px;
 }
-.content #btn_add {
+.content #btn_add_task {
   background-color: #33346c;
   color: #f4f6f8;
   cursor: pointer;
   font-family: Cambria, Cochin, Georgia, Times, "Times New Roman", serif;
 }
-.content #btn_add:hover {
+.content #btn_add_task:hover {
+  background-color: #061d5d;
+}
+.content #btn_upload_files {
+  background-color: #33346c;
+  color: #f4f6f8;
+  cursor: pointer;
+  font-family: Cambria, Cochin, Georgia, Times, "Times New Roman", serif;
+  margin: 20px 5px 5px 5px;
+  border: none;
+  border-radius: 30px;
+  padding: 15px 30px;
+  font-size: 18px;
+}
+.content #btn_upload_files:hover {
   background-color: #061d5d;
 }/*# sourceMappingURL=styles.css.map */

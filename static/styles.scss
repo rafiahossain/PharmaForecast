@@ -103,8 +103,64 @@ body {
     color: $text-light;           // ← uses $text-light
   }
 
+  h2 {
+    color: $accent;
+  }
+
   h4 {
     color: $bg-darker;            // ← uses $bg-darker
+  }
+
+  // ----------------------
+  // 😁 Dataset Page
+  // ----------------------
+  .dataset-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+    font-family: Arial, sans-serif;
+    padding: 2rem;
+    flex-wrap: nowrap;
+
+    .dataset-box {
+      flex: 1;
+      min-width: 0; // ensures shrinkable content
+      background-color: $primary;
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+      color: $on-dark;
+      h3 {
+        margin-top: 0;
+        color: $accent;
+      }
+
+      ul {
+        margin: 1rem 0;
+        padding-left: 1.25rem;
+
+        ul {
+          padding-left: 1.25rem;
+          margin-top: 0.5rem;
+        }
+      }
+
+      p {
+        margin: 0.5rem 0;
+        text-align:justify;
+      }
+
+      li {
+        text-align:justify;
+      }
+    }
+  }
+
+  // Optional: Make it stack vertically on small screens
+  @media (max-width: 768px) {
+    .dataset-container {
+      flex-direction: column;
+    }
   }
 
   table {
@@ -159,7 +215,6 @@ body {
   }
 
   input {
-    padding: 10px;
     margin: 20px 5px 5px 5px;
     border: none;
     border-radius: 30px;
@@ -167,11 +222,31 @@ body {
     font-size: 18px;
   }
 
-  #btn_add {
+  //From Index Html
+  //inherit qualities from <input>
+  #btn_add_task {
     background-color: $bg-dark;      // ← uses $bg-dark
     color: $on-dark;                 // ← uses $on-dark
     cursor: pointer;
     font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+
+    &:hover {
+      background-color: $bg-darker;  // ← uses $bg-darker
+    }
+  }
+
+  //From Data Entry Html 
+  // Does not inherit qualities from <input> because its <button>
+  #btn_upload_files {
+    background-color: $bg-dark;      // ← uses $bg-dark
+    color: $on-dark;                 // ← uses $on-dark
+    cursor: pointer;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    margin: 20px 5px 5px 5px;
+    border: none;
+    border-radius: 30px;
+    padding: 15px 30px;
+    font-size: 18px;
 
     &:hover {
       background-color: $bg-darker;  // ← uses $bg-darker
