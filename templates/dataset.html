@@ -8,20 +8,20 @@
   <div class="dataset-box">
     <h3>1. Consumption Report Item Wise</h3>
     <p><strong>Period:</strong> 01/01/2024 – 31/05/2025</p>
-    <p><strong>Purpose:</strong> Time Series Analysis of Drug Consumption</p>
+    <p><strong>Purpose:</strong> Regression Analysis of Item Consumption</p>
     <ul>
       <li><strong>Key Characteristics:</strong>
         <ul>
-          <li>Item-wise drug usage with timestamps</li>
-          <li>Fields: Date, Drug Code/Name, Quantity, Unit</li>
-          <li>Daily or monthly granularity</li>
+          <li>Item-wise drug and equipment usage with timestamps</li>
+          <li>Essential Fields: ItemName, Unit Name, Current Stock, Jan 2024, Feb 2024 ... May 2025</li>
+          <li>Monthly granularity. There should be atleast 12 months of consumption columns in the raw data.</li>
         </ul>
       </li>
-      <li><strong>Use in Time Series Analysis:</strong>
+      <li><strong>Use in Regression for Demand Forecasting:</strong>
         <ul>
-          <li>Forecast drug demand (ARIMA, Prophet, LSTM)</li>
+          <li>Forecast seasonal demand (ANN, Ridge, Lasso, etc.)</li>
           <li>Identify trends, seasonal spikes, and anomalies</li>
-          <li>Improve inventory management and reduce stockouts</li>
+          <li>Improve inventory management</li>
         </ul>
       </li>
     </ul>

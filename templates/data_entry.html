@@ -4,17 +4,18 @@
 
 {% block body %}
   <h1>Upload Excel (.xlsx) Files</h1>
-  <p>Data entry requirements: Please upload the following two Excel files separately.</p>
+  <p>Data entry requirements: Check Dataset Page for further information. <br> Please upload the following two Excel files separately.</p>
 
   <form method="POST" action="/upload-data" enctype="multipart/form-data">
-    <div>
-      <h2>📥 Goods Received Notice Data</h2>
-      <input type="file" name="goods_file" accept=".xlsx" required>
-    </div>
 
     <div>
       <h2>📥 Consumption Data</h2>
       <input type="file" name="consumption_file" accept=".xlsx" required>
+    </div>
+
+    <div>
+      <h2>📥 Goods Received Notice Data</h2>
+      <input type="file" name="goods_file" accept=".xlsx" required>
     </div>
 
     <br>

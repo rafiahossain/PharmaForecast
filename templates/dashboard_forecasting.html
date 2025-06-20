@@ -1,8 +1,41 @@
 {% extends 'base.html' %}
-
 {% block title %}Forecasting Overview{% endblock %}
 
 {% block body %}
-  <h1>Forecasting Overview</h1>
-  <p>This is the forecasting dashboard.</p>
+  <h1>📈 Demand Forecasting</h1>
+  <p>Monthly Forecast (June – August 2025)</p>
+  
+  {% if plot %}
+    <img src="data:image/png;base64,{{ plot }}" alt="Forecast Chart" width="100%">
+  {% else %}
+    <p><em>No forecast plot available. Please upload data to generate forecast.</em></p>
+  {% endif %}
+
+  <h2>📊 Model Comparison</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Model</th><th>R²</th><th>MAE</th><th>RMSE</th><th>MAE/Mean</th><th>RMSE/Mean</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in results %}
+        <tr>
+          <td>{{ row['Model'] }}</td>
+          <td>{{ "%.4f"|format(row['R2']) }}</td>
+          <td>{{ "%.2f"|format(row['MAE']) }}</td>
+          <td>{{ "%.2f"|format(row['RMSE']) }}</td>
+          <td>{{ "%.4f"|format(row['MAE/Mean']) }}</td>
+          <td>{{ "%.4f"|format(row['RMSE/Mean']) }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h2>📦 Always-Zero Items (For Inventory Check)</h2>
+  <ul>
+    {% for item in zero_items %}
+      <li>{{ item }}</li>
+    {% endfor %}
+  </ul>
 {% endblock %}
