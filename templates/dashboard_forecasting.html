@@ -15,13 +15,14 @@
   <table>
     <thead>
       <tr>
-        <th>Model</th><th>R²</th><th>MAE</th><th>RMSE</th><th>MAE/Mean</th><th>RMSE/Mean</th>
+        <th>Model</th><th>Time (s)</th><th>R²</th><th>MAE</th><th>RMSE</th><th>MAE/Mean</th><th>RMSE/Mean</th>
       </tr>
     </thead>
     <tbody>
       {% for row in results %}
         <tr>
           <td>{{ row['Model'] }}</td>
+          <td>{{ "%.4f"|format(row['Time (s)']) }}</td>
           <td>{{ "%.4f"|format(row['R2']) }}</td>
           <td>{{ "%.2f"|format(row['MAE']) }}</td>
           <td>{{ "%.2f"|format(row['RMSE']) }}</td>

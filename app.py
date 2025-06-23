@@ -19,6 +19,8 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.neural_network import MLPRegressor
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 from sklearn.model_selection import train_test_split
+# to measure execution time
+import time
 
 # create the app
 app = Flask(__name__)
@@ -125,9 +127,8 @@ def upload_data():
     df = df[df['Unit Name'].notna()]
     df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
 
-    cols_to_drop = ['Login Store Stock', 'Dept C Stock', 'Stock Value', 'No.Of days Stock',
-                    'Cost Per Item', 'Avg Con P.M.', 'Total cons.', 'Cons Per Day']
-    df = df.drop(columns=[col for col in cols_to_drop if col in df.columns])
+    # cols_to_drop = ['Login Store Stock', 'Dept C Stock', 'Stock Value', 'No.Of days Stock', 'Cost Per Item', 'Avg Con P.M.', 'Total cons.', 'Cons Per Day']
+    # df = df.drop(columns=[col for col in cols_to_drop if col in df.columns])
 
     def get_item_type_flags(name):
         name_lower = str(name).lower()
@@ -178,7 +179,7 @@ def upload_data():
 
     model_eval_results = evaluate_models(X_train, X_test, y_train, y_test, "Lag + Type Features")
 
-    best_model = LinearRegression()
+    best_model = Ridge(alpha=1.0)
     best_model.fit(X_train, y_train)
 
     # Forecast June–Aug for each item
@@ -235,9 +236,6 @@ def upload_data():
     plt.close()
 
     return redirect("/forecasting")
-    # flash messages or redirect to another page
-    # return f"Files uploaded successfully:<br>Goods File: {goods_filename}<br>Consumption File: {consumption_filename}"
-
 
 ######################################
 
@@ -272,13 +270,19 @@ def evaluate_models(X_train, X_test, y_train, y_test, feature_set_label):
     y_mean = y_test.mean()
     y_std = y_test.std()
     for name, model in models.items():
+        start_time = time.time()
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
+        end_time = time.time()
+        
+        # calculating evaluation metrics
+        exec_time = round(end_time - start_time, 4)
         mae = mean_absolute_error(y_test, y_pred)
         rmse = mean_squared_error(y_test, y_pred) ** 0.5
         results.append({
             "Model": name,
             "Feature Set": feature_set_label,
+            "Time (s)": exec_time,
             "R2": r2_score(y_test, y_pred),
             "MAE": mae,
             "RMSE": rmse,
@@ -287,6 +291,7 @@ def evaluate_models(X_train, X_test, y_train, y_test, feature_set_label):
             "RMSE/Mean": rmse / y_mean if y_mean != 0 else None,
             "RMSE/Std": rmse / y_std if y_std != 0 else None
         })
+        results = sorted(results, key=lambda x: x['Time (s)'])  # Fastest model first
     return results
 
 @app.route("/data-entry")
