@@ -10,6 +10,9 @@ from werkzeug.utils import secure_filename
 import pandas as pd
 import re
 # For forecasting
+# For forecasting
+import matplotlib
+matplotlib.use('Agg')  # ✅ Add this line
 import matplotlib.pyplot as plt
 import seaborn as sns
 import base64
@@ -43,6 +46,12 @@ class MyTask(db.Model):
 
 with app.app_context():
     db.create_all()
+    
+# Global storage for modeling results and always-zero items
+forecast_plot = None
+model_eval_results = []
+always_zero_items_list = []
+forecast_months = pd.DatetimeIndex([])
 
 # Home Page index, and a route to it
 @app.route("/",methods=["POST","GET"])
@@ -101,15 +110,17 @@ UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB max size
+# app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024  # 32 MB
 
-# Global storage for modeling results and always-zero items
-forecast_plot = None
-model_eval_results = []
-always_zero_items_list = []
 
 @app.route("/upload-data", methods=["POST"])
 def upload_data():
-    global forecast_plot, model_eval_results, always_zero_items_list
+    global forecast_plot, model_eval_results, always_zero_items_list, forecast_months
+    # Clear previous state
+    forecast_plot = None
+    model_eval_results = []
+    always_zero_items_list = []
+    forecast_months = pd.DatetimeIndex([])
 
     # File handling
     goods_file = request.files.get("goods_file")
@@ -123,12 +134,19 @@ def upload_data():
     consumption_file.save(consumption_path)
 
     # Data loading & preprocessing
+    try:
+        df = pd.read_excel(consumption_path, skiprows=10, header=0)
+    except Exception as e:
+        return f"Error reading consumption file: {str(e)}", 400
+
+    
     df = pd.read_excel(consumption_path, skiprows=10, header=0)
     df = df[df['Unit Name'].notna()]
     df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
 
     # cols_to_drop = ['Login Store Stock', 'Dept C Stock', 'Stock Value', 'No.Of days Stock', 'Cost Per Item', 'Avg Con P.M.', 'Total cons.', 'Cons Per Day']
-    # df = df.drop(columns=[col for col in cols_to_drop if col in df.columns])
+    cols_to_drop = ['Stock Value', 'No.Of days Stock', 'Cost Per Item', 'Total cons.', 'Cons Per Day']
+    df = df.drop(columns=[col for col in cols_to_drop if col in df.columns])
 
     def get_item_type_flags(name):
         name_lower = str(name).lower()
@@ -182,32 +200,8 @@ def upload_data():
     best_model = Ridge(alpha=1.0)
     best_model.fit(X_train, y_train)
 
-    # Forecast June–Aug for each item
-    latest_month = df_melted['Month'].max()
-    latest_df = df_melted[df_melted['Month'] == latest_month].copy()
+    plot_df, forecast_months = generate_forecast(df_melted, best_model, feature_cols)
 
-    forecast_months = pd.date_range(start="2025-06-01", periods=3, freq='MS')
-    forecast_rows = []
-
-    for forecast_month in forecast_months:
-        latest_df['Month'] = forecast_month
-        X_future = latest_df[feature_cols]
-        latest_df['Predicted_Consumption'] = best_model.predict(X_future)
-        forecast_rows.append(latest_df[['ItemName', 'Month', 'Predicted_Consumption']].copy())
-        latest_df['Lag_2'] = latest_df['Lag_1']
-        latest_df['Lag_1'] = latest_df['Predicted_Consumption']
-
-    forecast_df = pd.concat(forecast_rows, ignore_index=True)
-    forecast_df.rename(columns={'Predicted_Consumption': 'Value'}, inplace=True)
-    forecast_df['Source'] = 'Forecast'
-
-    history_df = df_melted[df_melted['Month'] >= (latest_month - pd.DateOffset(months=6))][
-        ['ItemName', 'Month', 'Consumption']
-    ].copy()
-    history_df.rename(columns={'Consumption': 'Value'}, inplace=True)
-    history_df['Source'] = 'Historical'
-
-    plot_df = pd.concat([history_df, forecast_df], ignore_index=True)
 
     top_items = df_melted.groupby('ItemName')['Consumption'].sum().sort_values(ascending=False).head(5).index
     plot_df = plot_df[plot_df['ItemName'].isin(top_items)]
@@ -223,7 +217,8 @@ def upload_data():
         markers=True,
         dashes=True
     )
-    plt.title("Top 5 Items: Forecast vs Historical (June–Aug 2025)")
+    # PLOTTING TITLE DYNAMICALLY
+    plt.title(f"Top 5 Items: Forecast vs Historical ({forecast_months[0].strftime('%b %Y')} to {forecast_months[-1].strftime('%b %Y')})")
     plt.xlabel("Month")
     plt.ylabel("Consumption")
     plt.xticks(rotation=45)
@@ -252,12 +247,26 @@ def suppliers():
 
 @app.route("/forecasting")
 def forecasting():
-    return render_template("dashboard_forecasting.html",
-                           plot=forecast_plot,
-                           results=model_eval_results,
-                           zero_items=always_zero_items_list)
-    # return render_template("dashboard_forecasting.html")
+    date_range_str = "No forecast yet. Please upload data."
     
+    if forecast_plot and model_eval_results:
+        if not forecast_months.empty:
+            date_range_str = f"{forecast_months[0].strftime('%b %Y')} – {forecast_months[-1].strftime('%b %Y')}"
+        else:
+            date_range_str = "Forecast date not available."
+
+    return render_template(
+        "dashboard_forecasting.html",
+        plot=forecast_plot,
+        results=model_eval_results,
+        zero_items=always_zero_items_list,
+        date_range=date_range_str
+    )
+
+
+
+
+# FUNCTION TO TRAIN AND TEST ALL TOP 5 MODELS FROM JNOTE    
 def evaluate_models(X_train, X_test, y_train, y_test, feature_set_label):
     results = []
     models = {
@@ -293,6 +302,54 @@ def evaluate_models(X_train, X_test, y_train, y_test, feature_set_label):
         })
         results = sorted(results, key=lambda x: x['Time (s)'])  # Fastest model first
     return results
+
+# FORECASTING UPCOMING 3 MONTHS FOR TOP 5 ITEMS USING RIDGE REGRESSION
+def generate_forecast(df_melted, model, feature_cols):
+    # latest month from data
+    latest_month = df_melted['Month'].max()
+
+    # Generate next 3 months dynamically
+    forecast_months = pd.date_range(start=latest_month + pd.DateOffset(months=1), periods=3, freq='MS')
+
+    forecast_rows = []
+
+    # the latest available data for each item
+    latest_df = df_melted[df_melted['Month'] == latest_month].copy()
+
+    # Loop per each forecast month
+    for forecast_month in forecast_months:
+        latest_df['Month'] = forecast_month
+
+        # input features
+        X_future = latest_df[feature_cols]
+        # Make predictions
+        latest_df['Predicted_Consumption'] = model.predict(X_future)
+        # Save results for this month
+        forecast_rows.append(latest_df[['ItemName', 'Month', 'Predicted_Consumption']].copy())
+
+        # Updating lags for the next prediction month otherwise error
+        latest_df['Lag_2'] = latest_df['Lag_1']
+        latest_df['Lag_1'] = latest_df['Predicted_Consumption']
+
+    # Combine forecast results into one df
+    forecast_df = pd.concat(forecast_rows, ignore_index=True)
+    forecast_df.rename(columns={'Predicted_Consumption': 'Value'}, inplace=True)
+    forecast_df['Source'] = 'Forecast'
+
+    # Historical data (past 6 months)
+    history_df = df_melted[df_melted['Month'] >= (latest_month - pd.DateOffset(months=6))][
+        ['ItemName', 'Month', 'Consumption']
+    ].copy()
+    history_df.rename(columns={'Consumption': 'Value'}, inplace=True)
+    history_df['Source'] = 'Historical'
+
+    # Combine history and forecast to plot
+    plot_df = pd.concat([history_df, forecast_df], ignore_index=True).sort_values(by='Month')
+
+    return plot_df, forecast_months
+
+
+
 
 @app.route("/data-entry")
 def data_entry():

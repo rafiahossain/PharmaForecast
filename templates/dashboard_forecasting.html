@@ -2,41 +2,50 @@
 {% block title %}Forecasting Overview{% endblock %}
 
 {% block body %}
-  <h1>📈 Demand Forecasting</h1>
-  <p>Monthly Forecast (June – August 2025)</p>
-  
-  {% if plot %}
+<h1>📈 Demand Forecasting</h1>
+<p>Monthly Forecast ({{ date_range }})</p>
+
+{% if plot %}
     <img src="data:image/png;base64,{{ plot }}" alt="Forecast Chart" width="100%">
-  {% else %}
+{% else %}
     <p><em>No forecast plot available. Please upload data to generate forecast.</em></p>
-  {% endif %}
+{% endif %}
 
-  <h2>📊 Model Comparison</h2>
-  <table>
-    <thead>
+<h2>📊 Model Comparison</h2>
+{% if results %}
+<table>
+  <thead>
+    <tr>
+      <th>Model</th><th>Time (s)</th><th>R²</th><th>MAE</th><th>RMSE</th><th>MAE/Mean</th><th>RMSE/Mean</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in results %}
       <tr>
-        <th>Model</th><th>Time (s)</th><th>R²</th><th>MAE</th><th>RMSE</th><th>MAE/Mean</th><th>RMSE/Mean</th>
+        <td>{{ row['Model'] }}</td>
+        <td>{{ "%.4f"|format(row['Time (s)']) }}</td>
+        <td>{{ "%.4f"|format(row['R2']) }}</td>
+        <td>{{ "%.2f"|format(row['MAE']) }}</td>
+        <td>{{ "%.2f"|format(row['RMSE']) }}</td>
+        <td>{{ "%.4f"|format(row['MAE/Mean']) }}</td>
+        <td>{{ "%.4f"|format(row['RMSE/Mean']) }}</td>
       </tr>
-    </thead>
-    <tbody>
-      {% for row in results %}
-        <tr>
-          <td>{{ row['Model'] }}</td>
-          <td>{{ "%.4f"|format(row['Time (s)']) }}</td>
-          <td>{{ "%.4f"|format(row['R2']) }}</td>
-          <td>{{ "%.2f"|format(row['MAE']) }}</td>
-          <td>{{ "%.2f"|format(row['RMSE']) }}</td>
-          <td>{{ "%.4f"|format(row['MAE/Mean']) }}</td>
-          <td>{{ "%.4f"|format(row['RMSE/Mean']) }}</td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-
-  <h2>📦 Always-Zero Items (For Inventory Check)</h2>
-  <ul>
-    {% for item in zero_items %}
-      <li>{{ item }}</li>
     {% endfor %}
-  </ul>
+  </tbody>
+</table>
+{% else %}
+<p><em>No model evaluation results yet.</em></p>
+{% endif %}
+
+<h2>📦 Always-Zero Items (For Inventory Check)</h2>
+{% if zero_items %}
+<ul>
+  {% for item in zero_items %}
+    <li>{{ item }}</li>
+  {% endfor %}
+</ul>
+{% else %}
+<p><em>No zero-consumption items or data not uploaded yet.</em></p>
+{% endif %}
+
 {% endblock %}
