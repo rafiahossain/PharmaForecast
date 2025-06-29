@@ -5,47 +5,77 @@
 <h1>📈 Demand Forecasting</h1>
 <p>Monthly Forecast ({{ date_range }})</p>
 
-{% if plot %}
-    <img src="data:image/png;base64,{{ plot }}" alt="Forecast Chart" width="100%">
-{% else %}
-    <p><em>No forecast plot available. Please upload data to generate forecast.</em></p>
-{% endif %}
+<div class="forecast-top">
+    <div class="forecast-left">
+        <h2>Monthly Forecast</h2>
+        {% if plot %}
+            <div class="chart-container">
+                <img src="data:image/png;base64,{{ plot }}" alt="Forecast Chart" width="100%">
+            </div>
+        {% else %}
+            <p><em>No forecast plot available. Please upload data to generate forecast.</em></p>
+        {% endif %}
+    </div>
 
-<h2>📊 Model Comparison</h2>
-{% if results %}
-<table>
-  <thead>
-    <tr>
-      <th>Model</th><th>Time (s)</th><th>R²</th><th>MAE</th><th>RMSE</th><th>MAE/Mean</th><th>RMSE/Mean</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for row in results %}
-      <tr>
-        <td>{{ row['Model'] }}</td>
-        <td>{{ "%.4f"|format(row['Time (s)']) }}</td>
-        <td>{{ "%.4f"|format(row['R2']) }}</td>
-        <td>{{ "%.2f"|format(row['MAE']) }}</td>
-        <td>{{ "%.2f"|format(row['RMSE']) }}</td>
-        <td>{{ "%.4f"|format(row['MAE/Mean']) }}</td>
-        <td>{{ "%.4f"|format(row['RMSE/Mean']) }}</td>
-      </tr>
-    {% endfor %}
-  </tbody>
-</table>
-{% else %}
-<p><em>No model evaluation results yet.</em></p>
-{% endif %}
+    <div class="forecast-right">
+        <h2>📦 Always-Zero Items</h2>
+        {% if zero_items %}
+          <div class="zero-items-box">
+            <ul>
+              {% for item in zero_items[:6] %}
+                <li>{{ item }}</li>
+              {% endfor %}
+            </ul>
+            <p>Showing first 6 items out of {{ zero_items|length }}.</p>
+            <a href="/download-zero-items">Download Full List (.txt)</a>
+          </div>
+        {% else %}
+            <p><em>No zero-consumption items or data not uploaded yet.</em></p>
+        {% endif %}
+    </div>
+</div>
 
-<h2>📦 Always-Zero Items (For Inventory Check)</h2>
-{% if zero_items %}
-<ul>
-  {% for item in zero_items %}
-    <li>{{ item }}</li>
-  {% endfor %}
-</ul>
-{% else %}
-<p><em>No zero-consumption items or data not uploaded yet.</em></p>
-{% endif %}
 
+<div class="forecast-bottom">
+    <div class="forecast-left">
+        <h2>📊 Model Comparison</h2>
+        {% if results %}
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th><th>Time (s)</th><th>R²</th><th>MAE</th><th>RMSE</th><th>MAE/Mean</th><th>RMSE/Mean</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in results %}
+              <tr>
+                <td>{{ row['Model'] }}</td>
+                <td>{{ "%.4f"|format(row['Time (s)']) }}</td>
+                <td>{{ "%.4f"|format(row['R2']) }}</td>
+                <td>{{ "%.2f"|format(row['MAE']) }}</td>
+                <td>{{ "%.2f"|format(row['RMSE']) }}</td>
+                <td>{{ "%.4f"|format(row['MAE/Mean']) }}</td>
+                <td>{{ "%.4f"|format(row['RMSE/Mean']) }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <p><em>No model evaluation results yet.</em></p>
+        {% endif %}
+    </div>
+
+    <div class="forecast-right">
+        <h2>Overall Demand Forecast</h2>
+        <div class="overall-forecast-box">
+        {% if overall_plot %}
+            <div class="chart-container">
+                <img src="data:image/png;base64,{{ overall_plot }}" style="max-width:100%;" alt="Overall Forecast">
+            </div>
+        {% else %}
+            <p>No overall forecast available. Please upload data.</p>
+        {% endif %}
+        </div>
+    </div>
+</div>
 {% endblock %}

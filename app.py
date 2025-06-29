@@ -24,6 +24,8 @@ from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 from sklearn.model_selection import train_test_split
 # to measure execution time
 import time
+# to download always zero items
+from flask import send_file
 
 # create the app
 app = Flask(__name__)
@@ -52,6 +54,8 @@ forecast_plot = None
 model_eval_results = []
 always_zero_items_list = []
 forecast_months = pd.DatetimeIndex([])
+overall_forecast_plot = None
+
 
 # Home Page index, and a route to it
 @app.route("/",methods=["POST","GET"])
@@ -115,7 +119,9 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB max size
 
 @app.route("/upload-data", methods=["POST"])
 def upload_data():
-    global forecast_plot, model_eval_results, always_zero_items_list, forecast_months
+    # global forecast_plot, model_eval_results, always_zero_items_list, forecast_months
+    global forecast_plot, model_eval_results, always_zero_items_list, forecast_months, overall_forecast_plot
+
     # Clear previous state
     forecast_plot = None
     model_eval_results = []
@@ -201,6 +207,7 @@ def upload_data():
     best_model.fit(X_train, y_train)
 
     plot_df, forecast_months = generate_forecast(df_melted, best_model, feature_cols)
+    overall_forecast_plot = generate_overall_forecast_plot(df_melted)
 
 
     top_items = df_melted.groupby('ItemName')['Consumption'].sum().sort_values(ascending=False).head(5).index
@@ -257,6 +264,7 @@ def forecasting():
 
     return render_template(
         "dashboard_forecasting.html",
+        overall_plot=overall_forecast_plot,
         plot=forecast_plot,
         results=model_eval_results,
         zero_items=always_zero_items_list,
@@ -348,7 +356,78 @@ def generate_forecast(df_melted, model, feature_cols):
 
     return plot_df, forecast_months
 
+# FORECASTING OVERALL DEMAND
+def generate_overall_forecast_plot(df_melted):
+    global forecast_months
 
+    # Aggregate total consumption per month
+    overall_df = df_melted.groupby('Month')['Consumption'].sum().reset_index()
+
+    # Create lag features
+    overall_df['Lag_1'] = overall_df['Consumption'].shift(1)
+    overall_df['Lag_2'] = overall_df['Consumption'].shift(2)
+    overall_df = overall_df.dropna()
+
+    # Train Ridge Regression on total consumption
+    X = overall_df[['Lag_1', 'Lag_2']]
+    y = overall_df['Consumption']
+
+    model = Ridge(alpha=1.0)
+    model.fit(X, y)
+
+    # Get latest lags
+    latest_month = overall_df['Month'].max()
+    lag_1 = overall_df.loc[overall_df['Month'] == latest_month, 'Lag_1'].values[0]
+    lag_2 = overall_df.loc[overall_df['Month'] == latest_month, 'Lag_2'].values[0]
+
+    forecast_months = pd.date_range(start=latest_month + pd.DateOffset(months=1), periods=3, freq='MS')
+
+    forecast_results = []
+
+    for forecast_month in forecast_months:
+        X_future = pd.DataFrame({'Lag_1': [lag_1], 'Lag_2': [lag_2]})
+        pred = model.predict(X_future)[0]
+        forecast_results.append({'Month': forecast_month, 'Consumption': pred})
+
+        # Update lags
+        lag_2 = lag_1
+        lag_1 = pred
+
+    forecast_df = pd.DataFrame(forecast_results)
+
+    # Plot
+    plt.figure(figsize=(10, 5))
+    plt.plot(overall_df['Month'], overall_df['Consumption'], marker='o', label='Historical')
+    plt.plot(forecast_df['Month'], forecast_df['Consumption'], marker='o', linestyle='--', label='Forecast')
+
+    plt.title(f'Overall Demand Forecast ({forecast_months[0].strftime("%b %Y")} – {forecast_months[-1].strftime("%b %Y")})')
+    plt.xlabel('Month')
+    plt.ylabel('Total Consumption')
+    plt.xticks(rotation=45)
+    plt.legend()
+    plt.tight_layout()
+
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+    plot_base64 = base64.b64encode(buf.getvalue()).decode('utf8')
+    plt.close()
+
+    return plot_base64
+
+from flask import send_file
+
+@app.route("/download-zero-items")
+def download_zero_items():
+    if not always_zero_items_list:
+        return "No data available to download.", 404
+
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], "always_zero_items.txt")
+    with open(file_path, 'w') as f:
+        for item in always_zero_items_list:
+            f.write(f"{item}\n")
+
+    return send_file(file_path, as_attachment=True)
 
 
 @app.route("/data-entry")
@@ -359,9 +438,9 @@ def data_entry():
 def dataset():
     return render_template("dataset.html")
 
-@app.route("/performance")
-def performance():
-    return render_template("performance.html")
+# @app.route("/performance")
+# def performance():
+#     return render_template("performance.html")
 
 # RUNNER and DEBUGGER
 # Keep Flask updating itself

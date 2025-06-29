@@ -16,13 +16,26 @@ $text-light: #bcb1d4;     // Titles, link hover text
 $surface: #061b4f;        // Content card background
 $on-dark: #f4f6f8;        // Text on dark backgrounds
 
+.layout {
+  display: flex;
+  padding: 30px; // Space from the edges of the screen
+  gap: 10px;     // Space between sidenav and content
+}
+
+
 // -------------------------
 // 😽 Styling Side Nav Bar
 // -------------------------
 
+
+
 .sidenav {
   height: 100vh;
-  width: 300px;
+  // width: 20%;    // Responsive sidebar width
+  flex: 0 0 max(250px, 20%);
+  border-radius: 20px;
+  min-width: 250px; // Optional: Prevent being too small
+  max-width: 300px; // Optional: Prevent being too large
   position: fixed;
   top: 0;
   left: 0;
@@ -74,7 +87,7 @@ footer {
 body {
   font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
   margin: 0;
-  margin-left: 300px;
+  margin-left: max(250px, 2%);
   padding: 0;
   background-color: $bg-dark; // ← uses $bg-dark
   color: $text-light;         // ← uses $text-light
@@ -88,16 +101,28 @@ body {
     font-style: italic;
     padding-top: 0;
     padding-bottom: 10px;
+    font-size: medium;
   }
 }
 
+
+
 .content {
-  max-width: 1300px;
-  margin: auto;
-  padding: 0px 30px 30px 30px;
+  max-width: 100%;
+  // width: calc(100% - max(250px, 20%)); // dynamic based on sidebar
+  flex: 1;
+  border-radius: 30px;
+  padding: 0 30px 30px;
   background-color: $surface;     // ← uses $surface
   border-radius: 30px;
   text-align: center;
+
+  .content .chart-container {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;  // Optional, adds scroll if needed
+  }
+
 
   h1 {
     color: $text-light;           // ← uses $text-light
@@ -156,13 +181,6 @@ body {
     }
   }
 
-  // Optional: Make it stack vertically on small screens
-  @media (max-width: 768px) {
-    .dataset-container {
-      flex-direction: column;
-    }
-  }
-
   table {
     width: 100%;
     margin-top: 20px;
@@ -178,6 +196,7 @@ body {
       border: 1px solid $surface;     // ← uses $surface
       background-color: $primary;     // ← uses $primary
       color: $on-dark;                // ← uses $on-dark
+      font-size: small;
     }
 
     th {
@@ -253,3 +272,177 @@ body {
     }
   }
 }
+
+// ---------------------------
+// 📊 Forecasting Dashboard Layout
+// ---------------------------
+
+.forecast-top,
+.forecast-bottom {
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+
+  .forecast-left {
+    flex: 0 0 65%;
+    min-width: 400px;
+  }
+
+  .forecast-right {
+    flex: 0 0 30%;
+    min-width: 200px;
+  }
+  
+}
+
+.forecast-bottom {
+  align-items: stretch;
+}
+
+.overall-forecast-box {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  text-align: center;
+  min-height: 220px; // optional: ensures visible centering even if parent is small
+}
+
+// .overall-forecast-box {
+//   background-color: $primary;
+//   color: $on-dark;
+//   flex: 1;
+//   display: flex;
+//   justify-content: center;
+//   align-items: center;
+//   flex-direction: column;
+//   text-align: center;
+//   padding: 0.75rem;
+//   border-radius: 0.75rem;
+//   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+//   min-height: 200px; // Optional: adjusts vertical space
+
+//   img {
+//     max-width: 100%;
+//     max-height: 100%;
+//     object-fit: contain;
+//   }
+
+//   p {
+//     margin: 0;
+//   }
+// }
+
+
+// .forecast-bottom .forecast-right {
+//   display: flex;
+//   justify-content: center;
+//   align-items: center;
+//   flex-direction: column;
+//   text-align: center;
+// }
+
+
+
+// ---------------------------
+// Always-Zero Items
+// ---------------------------
+
+.zero-items-box {
+  background-color: $primary;
+  color: $on-dark;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  font-size: small;
+
+  ul {
+    padding-left: 1.25rem;
+    text-align: left;
+  }
+
+  li {
+    margin-bottom: 5px;
+  }
+
+  p {
+    margin-top: 1rem;
+    text-align: left;
+  }
+
+  a {
+    background-color: $accent;
+    color: $on-dark;
+    padding: 6px 12px;
+    border-radius: 20px;
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+      background-color: $text-light;
+      color: $bg-dark;
+    }
+  }
+}
+
+//MEDIA QUERY FOR SCREEN SIZES
+//FLEXBOX
+
+@media (max-width: 768px) {
+  .layout {
+    flex-direction: column;
+  }
+
+  .sidenav {
+    width: 100%;
+    position: relative;
+    height: auto;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    padding-top: 10px;
+  }
+
+  .sidenav ul {
+    display: flex;
+    gap: 10px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .sidenav li {
+    margin: 0;
+  }
+
+  .sidenav a {
+    padding: 8px 12px;
+    font-size: 14px;
+    text-align: center;
+  }
+
+  body {
+    margin-left: 0;
+  }
+
+  .content {
+    width: 100%;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .dataset-container {
+    flex-direction: column;
+  }
+
+  .forecast-top,
+  .forecast-bottom {
+    flex-direction: column;
+  }
+}
+
