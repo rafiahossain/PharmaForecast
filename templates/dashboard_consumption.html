@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Consumption Overview{% endblock %}
+{% block title %}Consumption{% endblock %}
 
 {% block body %}
 <h1>Consumption and Stock Overview</h1>
@@ -34,4 +34,25 @@
     </ul>
   </div>
 </div>
+
+<div class="consumption-bottom">
+  <div class="chart-large">
+    <h2>Top 5 Items by Average Monthly Consumption</h2>
+    {% if avg_consumption_plot %}
+      <img src="data:image/png;base64,{{ avg_consumption_plot }}">
+    {% else %}
+      <p>No chart available.</p>
+    {% endif %}
+  </div>
+
+  <div class="chart-small">
+    <h2>Consumption: Boxes vs Regular Units</h2>
+    {% if box_vs_regular_plot %}
+      <img src="data:image/png;base64,{{ box_vs_regular_plot }}">
+    {% else %}
+      <p>No chart available.</p>
+    {% endif %}
+  </div>
+</div>
+
 {% endblock %}

@@ -449,6 +449,52 @@ body {
   }
 }
 
+// BOTTOM CHARTS
+
+
+.consumption-bottom {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+
+  .chart-large {
+    flex: 0 0 65%;
+    min-width: 380px;
+    background-color: $primary;
+    border-radius: 0.75rem;
+    padding: 0.3rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+    h2 {
+      color: $accent;
+      margin-bottom: 0.5rem;
+    }
+
+    img {
+      max-width: 100%;
+    }
+  }
+
+  .chart-small {
+    flex: 0 0 31%;
+    min-width: 190px;
+    background-color: $primary;
+    border-radius: 0.75rem;
+    padding: 0.3rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+    h2 {
+      color: $accent;
+      margin-bottom: 0.5rem;
+    }
+
+    img {
+      max-width: 100%;
+    }
+  }
+}
 
 
 

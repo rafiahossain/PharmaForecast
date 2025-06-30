@@ -59,6 +59,8 @@ overall_forecast_plot = None
 # For consumption overview page
 consumption_plot = None
 stock_status_plot = None
+avg_consumption_plot = None
+box_vs_regular_plot = None
 
 
 
@@ -128,7 +130,7 @@ def upload_data():
     # global forecast_plot, model_eval_results, always_zero_items_list, forecast_months
     global forecast_plot, model_eval_results, always_zero_items_list, forecast_months, overall_forecast_plot
     # for cons overview page
-    global consumption_plot, stock_status_plot
+    global consumption_plot, stock_status_plot, avg_consumption_plot, box_vs_regular_plot
 
     # Clear previous state
     forecast_plot = None
@@ -138,7 +140,8 @@ def upload_data():
     # for cons overview page
     consumption_plot = None
     stock_status_plot = None
-
+    avg_consumption_plot = None
+    box_vs_regular_plot = None
 
     # File handling
     goods_file = request.files.get("goods_file")
@@ -331,6 +334,70 @@ def upload_data():
     buf.seek(0)
     stock_status_plot = base64.b64encode(buf.getvalue()).decode('utf8')
     plt.close()
+    
+    # ------------------- top 5 items by avg monthly consumption horizontal bar chart -------------------
+    avg_consumption = (
+        df_melted.groupby('ItemName')['Consumption']
+        .mean()
+        .sort_values(ascending=False)
+        .head(5)
+    )
+
+    plt.figure(figsize=(10, 3))
+    bars = avg_consumption.plot(
+        kind='barh',
+        color='#4cc8f2'  # Accent color
+    )
+
+    plt.xlabel('Average Monthly Consumption', color='white')
+    plt.ylabel('')
+    plt.xticks(color='white')
+    plt.yticks(color='white')
+    plt.gca().invert_yaxis()
+
+    plt.gca().set_facecolor('none')
+    plt.gcf().set_facecolor('none')
+
+    plt.tight_layout()
+
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png', transparent=True)
+    buf.seek(0)
+    avg_consumption_plot = base64.b64encode(buf.getvalue()).decode('utf8')
+    plt.close()
+
+     # ------------------- box vs non-box Box Plot -------------------
+     
+    plt.figure(figsize=(8, 5))
+    # plt.figure(figsize=(7, 4))
+    sns.boxplot(
+        x='IS_BOX', 
+        y='Consumption', 
+        data=df_melted,
+        boxprops=dict(color='white'),
+        medianprops=dict(color='white'),
+        whiskerprops=dict(color='white'),
+        capprops=dict(color='white'),
+        flierprops=dict(markerfacecolor='white', markeredgecolor='white')
+    )
+
+    plt.xticks([0, 1], ['Regular Units', 'Box'], color='white')
+    plt.yticks(color='white')
+    plt.ylabel("Consumption", color='white')
+    plt.xlabel(None)
+
+    plt.grid(True, color='gray')
+
+    plt.gca().set_facecolor('none')
+    plt.gcf().set_facecolor('none')
+
+    plt.tight_layout()
+
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png', transparent=True)
+    buf.seek(0)
+    box_vs_regular_plot = base64.b64encode(buf.getvalue()).decode('utf8')
+    plt.close()
 
     return redirect("/forecasting")
 
@@ -344,7 +411,9 @@ def consumption():
     return render_template(
         "dashboard_consumption.html",
         consumption_plot=consumption_plot,
-        stock_status_plot=stock_status_plot
+        stock_status_plot=stock_status_plot,
+        avg_consumption_plot=avg_consumption_plot,
+        box_vs_regular_plot=box_vs_regular_plot
     )
 
 @app.route("/suppliers")

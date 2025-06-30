@@ -310,6 +310,44 @@ body h2 {
   margin-bottom: 0.5rem;
 }
 
+.consumption-bottom {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+.consumption-bottom .chart-large {
+  flex: 0 0 65%;
+  min-width: 380px;
+  background-color: #54469b;
+  border-radius: 0.75rem;
+  padding: 0.3rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+.consumption-bottom .chart-large h2 {
+  color: #4cc8f2;
+  margin-bottom: 0.5rem;
+}
+.consumption-bottom .chart-large img {
+  max-width: 100%;
+}
+.consumption-bottom .chart-small {
+  flex: 0 0 31%;
+  min-width: 190px;
+  background-color: #54469b;
+  border-radius: 0.75rem;
+  padding: 0.3rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+.consumption-bottom .chart-small h2 {
+  color: #4cc8f2;
+  margin-bottom: 0.5rem;
+}
+.consumption-bottom .chart-small img {
+  max-width: 100%;
+}
+
 @media (max-width: 768px) {
   .layout {
     flex-direction: column;
