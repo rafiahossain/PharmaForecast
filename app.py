@@ -8,6 +8,7 @@ import os
 from werkzeug.utils import secure_filename
 # For preprocessing
 import pandas as pd
+import numpy as np
 import re
 # For forecasting
 # For forecasting
@@ -55,6 +56,11 @@ model_eval_results = []
 always_zero_items_list = []
 forecast_months = pd.DatetimeIndex([])
 overall_forecast_plot = None
+# For consumption overview page
+consumption_plot = None
+stock_status_plot = None
+
+
 
 
 # Home Page index, and a route to it
@@ -121,12 +127,18 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB max size
 def upload_data():
     # global forecast_plot, model_eval_results, always_zero_items_list, forecast_months
     global forecast_plot, model_eval_results, always_zero_items_list, forecast_months, overall_forecast_plot
+    # for cons overview page
+    global consumption_plot, stock_status_plot
 
     # Clear previous state
     forecast_plot = None
     model_eval_results = []
     always_zero_items_list = []
     forecast_months = pd.DatetimeIndex([])
+    # for cons overview page
+    consumption_plot = None
+    stock_status_plot = None
+
 
     # File handling
     goods_file = request.files.get("goods_file")
@@ -236,6 +248,89 @@ def upload_data():
     buf.seek(0)
     forecast_plot = base64.b64encode(buf.getvalue()).decode('utf8')
     plt.close()
+    
+    # ------------------- Consumption by Product Type Chart -------------------
+    categories = ['CAPSULE', 'DENTAL', 'INJECTABLES', 'SUSPENSION', 'SYRUP', 'TABLET']
+    category_consumption = df_melted[categories].sum()
+
+    plt.figure(figsize=(8, 6))
+    category_consumption.plot(
+        kind='bar', 
+        color=sns.color_palette("pastel")
+    )
+
+    plt.ylabel('Total Consumption', color='white', fontsize=12, weight='bold')
+
+    plt.xticks(
+        rotation=45, 
+        color='white', 
+        fontsize=10, 
+        weight='bold'
+    )
+    plt.yticks(
+        color='white', 
+        fontsize=10, 
+        weight='bold'
+    )
+
+    plt.gca().spines['bottom'].set_color('white')
+    plt.gca().spines['left'].set_color('white')
+    plt.gca().spines['top'].set_color('white')
+    plt.gca().spines['right'].set_color('white')
+
+    plt.gca().tick_params(colors='white')
+
+    plt.tight_layout()
+
+    plt.gca().set_facecolor('none')
+    plt.gcf().set_facecolor('none')
+
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png', transparent=True)
+    buf.seek(0)
+    consumption_plot = base64.b64encode(buf.getvalue()).decode('utf8')
+    plt.close()
+
+    # ------------------- Stock Status Distribution Pie Chart -------------------
+    df_melted['Months_Supply'] = df_melted['Current Stock'] / df_melted['Consumption'].replace(0, np.nan)
+    df_melted['Stock_Status'] = np.where(
+        df_melted['Months_Supply'] < 1, 'Low',
+        np.where(df_melted['Months_Supply'] > 3, 'High', 'Normal')
+    )
+
+    plt.figure(figsize=(6, 6))
+    colors = ['#ffffff', '#7677c4', '#4DC8F2']  # Adjust your colors here
+
+    counts = df_melted['Stock_Status'].value_counts()
+    labels = counts.index
+    sizes = counts.values
+
+    def make_autopct(values):
+        def my_autopct(pct):
+            total = sum(values)
+            count = int(round(pct * total / 100.0))
+            return f'{labels[list(sizes).index(count)]}\n{pct:.1f}%' if count in sizes else ''
+        return my_autopct
+
+    # Plot with labels inside
+    plt.pie(
+        sizes,
+        autopct=make_autopct(sizes),
+        startangle=90,
+        colors=colors,
+        wedgeprops={'edgecolor': 'white'},
+        textprops={'color': 'black', 'weight': 'bold', 'fontsize': 10}  # ✅ Text inside
+    )
+
+    plt.tight_layout()
+    plt.gca().set_facecolor('none')
+    plt.gcf().set_facecolor('none')
+
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png', transparent=True)
+    buf.seek(0)
+    stock_status_plot = base64.b64encode(buf.getvalue()).decode('utf8')
+    plt.close()
 
     return redirect("/forecasting")
 
@@ -246,7 +341,11 @@ def upload_data():
 ######################################
 @app.route("/consumption")
 def consumption():
-    return render_template("dashboard_consumption.html")
+    return render_template(
+        "dashboard_consumption.html",
+        consumption_plot=consumption_plot,
+        stock_status_plot=stock_status_plot
+    )
 
 @app.route("/suppliers")
 def suppliers():

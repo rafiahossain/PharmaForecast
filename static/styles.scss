@@ -390,8 +390,108 @@ body {
   }
 }
 
+
+
+// ---------------------------
+
+// CONSUMPTION OVERVIEW DASHBOARD
+
+// ---------------------------
+
+
+
+.consumption-overview {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+
+  .chart-box {
+    flex: 1;
+    min-width: 190px;
+    background-color: $primary;
+    border-radius: 0.75rem;
+    padding: 0.3rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+    h2 {
+      color: $accent;
+      margin-bottom: 0rem;
+    }
+
+    img {
+      max-width: 100%;
+    }
+  }
+
+  .takeaways-box {
+    flex: 1;
+    min-width: 190px;
+    background-color: $primary;
+    border-radius: 0.75rem;
+    padding: 0.3rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    color: #ffffff;
+
+    h2 {
+      color: $accent;
+      margin-bottom: 0.5rem;
+    }
+
+    ul {
+      padding-left: 1.25rem;
+      text-align: left;
+
+      li {
+        margin-bottom: 0.5rem;
+      }
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+// ---------------------------
+
+// STYLING
+
+// ---------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ---------------------------
+
 //MEDIA QUERY FOR SCREEN SIZES
 //FLEXBOX
+
+// ---------------------------
 
 @media (max-width: 768px) {
   .layout {
