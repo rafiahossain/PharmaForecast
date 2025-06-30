@@ -3,6 +3,52 @@
 {% block title %}Dataset Overview{% endblock %}
 
 {% block body %}
-  <h1>Dataset Sample</h1>
-  <p>About the dataset.</p>
+  <h1>Datasets</h1>
+<div class="dataset-container">
+  <div class="dataset-box">
+    <h3>1. Consumption Report Item Wise</h3>
+    <p><strong>Period:</strong> 01/01/2024 – 31/05/2025</p>
+    <p><strong>Purpose:</strong> Regression Analysis of Item Consumption</p>
+    <ul>
+      <li><strong>Key Characteristics:</strong>
+        <ul>
+          <li>Item-wise drug and equipment usage with timestamps</li>
+          <li>Essential Fields: ItemName, Unit Name, Current Stock, Jan 2024, Feb 2024 ... May 2025</li>
+          <li>Monthly granularity. There should be atleast 12 months of consumption columns in the raw data.</li>
+        </ul>
+      </li>
+      <li><strong>Use in Regression for Demand Forecasting:</strong>
+        <ul>
+          <li>Forecast seasonal demand (ANN, Ridge, Lasso, etc.)</li>
+          <li>Identify trends, seasonal spikes, and anomalies</li>
+          <li>Improve inventory management</li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <div class="dataset-box">
+    <h3>2. GRN Register (Supplier Wise)</h3>
+    <p><strong>Period:</strong> 01/01/2024 – 31/05/2025</p>
+    <p><strong>Purpose:</strong> Supply Chain Risk Management (SCRM)</p>
+    <ul>
+      <li><strong>Key Characteristics:</strong>
+        <ul>
+          <li>Logs of goods received from suppliers</li>
+          <li>Fields: GRN Date, Supplier, Item, Quantity, Delay, PO</li>
+          <li>Supplier-level delivery performance</li>
+        </ul>
+      </li>
+      <li><strong>Use in SCRM:</strong>
+        <ul>
+          <li>Track supplier delays or incomplete deliveries</li>
+          <li>Correlate supply with consumption patterns</li>
+          <li>Identify supply risks or bottlenecks</li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+</div>
+
+
 {% endblock %}

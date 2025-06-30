@@ -16,13 +16,26 @@ $text-light: #bcb1d4;     // Titles, link hover text
 $surface: #061b4f;        // Content card background
 $on-dark: #f4f6f8;        // Text on dark backgrounds
 
+.layout {
+  display: flex;
+  padding: 30px; // Space from the edges of the screen
+  gap: 10px;     // Space between sidenav and content
+}
+
+
 // -------------------------
 // 😽 Styling Side Nav Bar
 // -------------------------
 
+
+
 .sidenav {
   height: 100vh;
-  width: 300px;
+  // width: 20%;    // Responsive sidebar width
+  flex: 0 0 max(250px, 20%);
+  border-radius: 20px;
+  min-width: 250px; // Optional: Prevent being too small
+  max-width: 300px; // Optional: Prevent being too large
   position: fixed;
   top: 0;
   left: 0;
@@ -74,7 +87,7 @@ footer {
 body {
   font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
   margin: 0;
-  margin-left: 300px;
+  margin-left: max(250px, 2%);
   padding: 0;
   background-color: $bg-dark; // ← uses $bg-dark
   color: $text-light;         // ← uses $text-light
@@ -88,23 +101,84 @@ body {
     font-style: italic;
     padding-top: 0;
     padding-bottom: 10px;
+    font-size: medium;
   }
 }
 
+
+
 .content {
-  max-width: 1300px;
-  margin: auto;
-  padding: 0px 30px 30px 30px;
+  max-width: 100%;
+  // width: calc(100% - max(250px, 20%)); // dynamic based on sidebar
+  flex: 1;
+  border-radius: 30px;
+  padding: 0 30px 30px;
   background-color: $surface;     // ← uses $surface
   border-radius: 30px;
   text-align: center;
+
+  .content .chart-container {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;  // Optional, adds scroll if needed
+  }
+
 
   h1 {
     color: $text-light;           // ← uses $text-light
   }
 
+  h2 {
+    color: $accent;
+  }
+
   h4 {
     color: $bg-darker;            // ← uses $bg-darker
+  }
+
+  // ----------------------
+  // 😁 Dataset Page
+  // ----------------------
+  .dataset-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+    font-family: Arial, sans-serif;
+    padding: 2rem;
+    flex-wrap: nowrap;
+
+    .dataset-box {
+      flex: 1;
+      min-width: 0; // ensures shrinkable content
+      background-color: $primary;
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+      color: $on-dark;
+      h3 {
+        margin-top: 0;
+        color: $accent;
+      }
+
+      ul {
+        margin: 1rem 0;
+        padding-left: 1.25rem;
+
+        ul {
+          padding-left: 1.25rem;
+          margin-top: 0.5rem;
+        }
+      }
+
+      p {
+        margin: 0.5rem 0;
+        text-align:justify;
+      }
+
+      li {
+        text-align:justify;
+      }
+    }
   }
 
   table {
@@ -122,6 +196,7 @@ body {
       border: 1px solid $surface;     // ← uses $surface
       background-color: $primary;     // ← uses $primary
       color: $on-dark;                // ← uses $on-dark
+      font-size: small;
     }
 
     th {
@@ -159,7 +234,6 @@ body {
   }
 
   input {
-    padding: 10px;
     margin: 20px 5px 5px 5px;
     border: none;
     border-radius: 30px;
@@ -167,7 +241,9 @@ body {
     font-size: 18px;
   }
 
-  #btn_add {
+  //From Index Html
+  //inherit qualities from <input>
+  #btn_add_task {
     background-color: $bg-dark;      // ← uses $bg-dark
     color: $on-dark;                 // ← uses $on-dark
     cursor: pointer;
@@ -177,4 +253,342 @@ body {
       background-color: $bg-darker;  // ← uses $bg-darker
     }
   }
+
+  //From Data Entry Html 
+  // Does not inherit qualities from <input> because its <button>
+  #btn_upload_files {
+    background-color: $bg-dark;      // ← uses $bg-dark
+    color: $on-dark;                 // ← uses $on-dark
+    cursor: pointer;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    margin: 20px 5px 5px 5px;
+    border: none;
+    border-radius: 30px;
+    padding: 15px 30px;
+    font-size: 18px;
+
+    &:hover {
+      background-color: $bg-darker;  // ← uses $bg-darker
+    }
+  }
 }
+
+// ---------------------------
+// 📊 Forecasting Dashboard Layout
+// ---------------------------
+
+.forecast-top,
+.forecast-bottom {
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+
+  .forecast-left {
+    flex: 0 0 65%;
+    min-width: 400px;
+  }
+
+  .forecast-right {
+    flex: 0 0 30%;
+    min-width: 200px;
+  }
+  
+}
+
+.forecast-bottom {
+  align-items: stretch;
+}
+
+.overall-forecast-box {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  text-align: center;
+  min-height: 220px; // optional: ensures visible centering even if parent is small
+}
+
+// .overall-forecast-box {
+//   background-color: $primary;
+//   color: $on-dark;
+//   flex: 1;
+//   display: flex;
+//   justify-content: center;
+//   align-items: center;
+//   flex-direction: column;
+//   text-align: center;
+//   padding: 0.75rem;
+//   border-radius: 0.75rem;
+//   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+//   min-height: 200px; // Optional: adjusts vertical space
+
+//   img {
+//     max-width: 100%;
+//     max-height: 100%;
+//     object-fit: contain;
+//   }
+
+//   p {
+//     margin: 0;
+//   }
+// }
+
+
+// .forecast-bottom .forecast-right {
+//   display: flex;
+//   justify-content: center;
+//   align-items: center;
+//   flex-direction: column;
+//   text-align: center;
+// }
+
+
+
+// ---------------------------
+// Always-Zero Items
+// ---------------------------
+
+.zero-items-box {
+  background-color: $primary;
+  color: $on-dark;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  font-size: small;
+
+  ul {
+    padding-left: 1.25rem;
+    text-align: left;
+  }
+
+  li {
+    margin-bottom: 5px;
+  }
+
+  p {
+    margin-top: 1rem;
+    text-align: left;
+  }
+
+  a {
+    background-color: $accent;
+    color: $on-dark;
+    padding: 6px 12px;
+    border-radius: 20px;
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+      background-color: $text-light;
+      color: $bg-dark;
+    }
+  }
+}
+
+
+
+// ---------------------------
+
+// CONSUMPTION OVERVIEW DASHBOARD
+
+// ---------------------------
+
+
+
+.consumption-overview {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+
+  .chart-box {
+    flex: 1;
+    min-width: 190px;
+    background-color: $primary;
+    border-radius: 0.75rem;
+    padding: 0.3rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+    h2 {
+      color: $accent;
+      margin-bottom: 0rem;
+    }
+
+    img {
+      max-width: 100%;
+    }
+  }
+
+  .takeaways-box {
+    flex: 1;
+    min-width: 190px;
+    background-color: $primary;
+    border-radius: 0.75rem;
+    padding: 0.3rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    color: #ffffff;
+
+    h2 {
+      color: $accent;
+      margin-bottom: 0.5rem;
+    }
+
+    ul {
+      padding-left: 1.25rem;
+      text-align: left;
+
+      li {
+        margin-bottom: 0.5rem;
+      }
+    }
+  }
+}
+
+// BOTTOM CHARTS
+
+
+.consumption-bottom {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+
+  .chart-large {
+    flex: 0 0 65%;
+    min-width: 380px;
+    background-color: $primary;
+    border-radius: 0.75rem;
+    padding: 0.3rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+    h2 {
+      color: $accent;
+      margin-bottom: 0.5rem;
+    }
+
+    img {
+      max-width: 100%;
+    }
+  }
+
+  .chart-small {
+    flex: 0 0 31%;
+    min-width: 190px;
+    background-color: $primary;
+    border-radius: 0.75rem;
+    padding: 0.3rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+    h2 {
+      color: $accent;
+      margin-bottom: 0.5rem;
+    }
+
+    img {
+      max-width: 100%;
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+// ---------------------------
+
+// STYLING
+
+// ---------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ---------------------------
+
+//MEDIA QUERY FOR SCREEN SIZES
+//FLEXBOX
+
+// ---------------------------
+
+@media (max-width: 768px) {
+  .layout {
+    flex-direction: column;
+  }
+
+  .sidenav {
+    width: 100%;
+    position: relative;
+    height: auto;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    padding-top: 10px;
+  }
+
+  .sidenav ul {
+    display: flex;
+    gap: 10px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .sidenav li {
+    margin: 0;
+  }
+
+  .sidenav a {
+    padding: 8px 12px;
+    font-size: 14px;
+    text-align: center;
+  }
+
+  body {
+    margin-left: 0;
+  }
+
+  .content {
+    width: 100%;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .dataset-container {
+    flex-direction: column;
+  }
+
+  .forecast-top,
+  .forecast-bottom {
+    flex-direction: column;
+  }
+}
+
