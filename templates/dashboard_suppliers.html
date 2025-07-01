@@ -1,8 +1,27 @@
 {% extends 'base.html' %}
 
-{% block title %}Suppliers Overview{% endblock %}
+{% block title %}Supply Chain Risks{% endblock %}
 
 {% block body %}
-  <h1>Suppliers Overview</h1>
-  <p>This is the suppliers dashboard.</p>
+  <h1>Supply Chain Risk Dashboard</h1>
+  <p>This is the dashboard highlighting key supply chain risks and insights from the Supplier-wise Goods Received Notice (GRN) Data. It can be used to highlight supplier risks, delivery delays, expiry risks and item value based risks.</p>
+
+  <div class="kpi-container">
+    {% if kpis %}
+      {% for key, value in kpis.items() %}
+        <div class="kpi-card">
+          <h3>{{ key }}</h3>
+          <p>{{ value }}</p>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="kpi-placeholder">
+        <p style="color: white; font-weight: bold;">
+          No data loaded. Please upload the data to view KPIs.
+        </p>
+      </div>
+    {% endif %}
+  </div>
+
+
 {% endblock %}

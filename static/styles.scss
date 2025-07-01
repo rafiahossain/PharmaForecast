@@ -496,22 +496,52 @@ body {
   }
 }
 
+// ---------------------------
 
-
-
-
-
-
-
-
-
+// SUPPLY CHAIN RISKS DASHBOARD
 
 // ---------------------------
 
-// STYLING
+.kpi-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  justify-content: center;
 
-// ---------------------------
+  .kpi-card {
+    background-color: $accent;
+    color: $surface;
+    border-radius: 0.75rem;
+    padding: 0.3rem;
+    min-width: 130px;
+    flex: 1 1 130px;
+    max-width: 100px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    text-align: center;
 
+    h3 {
+      margin: 0;
+      font-size: 0.75rem;
+      color: $primary;
+    }
+
+    p {
+      margin-top: 0.5rem;
+      font-size: 1rem;
+      font-weight: bold;
+      color: $surface;
+    }
+  }
+
+  .kpi-placeholder {
+    width: 100%;
+    padding: 1rem;
+    border: 2px dashed $text-light;
+    border-radius: 0.75rem;
+    text-align: center;
+    color: $text-light;
+  }
+}
 
 
 

@@ -61,6 +61,8 @@ consumption_plot = None
 stock_status_plot = None
 avg_consumption_plot = None
 box_vs_regular_plot = None
+# For GRN data
+cl2 = None 
 
 
 
@@ -131,6 +133,8 @@ def upload_data():
     global forecast_plot, model_eval_results, always_zero_items_list, forecast_months, overall_forecast_plot
     # for cons overview page
     global consumption_plot, stock_status_plot, avg_consumption_plot, box_vs_regular_plot
+    # for grn data
+    global cl2
 
     # Clear previous state
     forecast_plot = None
@@ -154,7 +158,7 @@ def upload_data():
     goods_file.save(goods_path)
     consumption_file.save(consumption_path)
 
-    # Data loading & preprocessing
+    # Data loading & preprocessing for consumption data
     try:
         df = pd.read_excel(consumption_path, skiprows=10, header=0)
     except Exception as e:
@@ -208,6 +212,57 @@ def upload_data():
     df_melted['Lag_1'] = df_melted.groupby('ItemName')['Consumption'].shift(1)
     df_melted['Lag_2'] = df_melted.groupby('ItemName')['Consumption'].shift(2)
     df_melted.dropna(subset=['Lag_1', 'Lag_2'], inplace=True)
+    
+    # Data loading and preprocessing for GRN data
+    
+    # GOODS FILE PREPROCESSING
+
+    try:
+        df2 = pd.read_excel(goods_path, skiprows=9)
+    except Exception as e:
+        return f"Error reading goods file: {str(e)}", 400
+
+    # Strip whitespaces from column names
+    df2.columns = df2.columns.str.strip()
+
+    # Step 1: Drop rows with null in important columns
+    cl2 = df2.dropna(subset=[
+        'Batch No', 'Item Name', 'Challan No./ Date :', 'PO No. / Date :', 'PO Unit Rate'
+    ])
+
+    # Step 2: Drop 'Unnamed' columns
+    cl2 = cl2.loc[:, ~cl2.columns.str.contains('^Unnamed')]
+
+    # Step 3: Drop unnecessary columns
+    cl2 = cl2.drop(columns=[
+        "Rate", "Free Qty.", "Status", "Unit Name", "GRN type", "GIR No.", 
+        "Disc. %", "Disc. Amt", "VAT%", "VAT"
+    ], errors='ignore')
+
+    # Step 4: Standardize 'Sub Category'
+    cl2['Sub Category'] = cl2['Sub Category'].replace(
+        ['INJ.', 'INJECTION'], 'INJECTABLES'
+    )
+
+    # Step 5: Split 'No / Date' columns
+    cl2[['Bill No', 'Bill Date']] = cl2['Bill No. / Date'].str.split(r' / ', n=1, expand=True)
+    cl2[['PO No', 'PO Date']] = cl2['PO No. / Date :'].str.split(r' / ', n=1, expand=True)
+    cl2[['Challan No', 'Challan Date']] = cl2['Challan No./ Date :'].str.split(r'\*/', n=1, expand=True)
+
+    # Step 6: Standardize date columns
+    date_columns = ['Bill Date', 'PO Date', 'Challan Date', 'Grn Date', 'Expiry Date']
+    for col in date_columns:
+        cl2[col] = pd.to_datetime(cl2[col], dayfirst=True, errors='coerce')
+
+    # Step 7: Drop original combo columns
+    cl2.drop(columns=[
+        'Bill No. / Date', 'PO No. / Date :', 'Challan No./ Date :'
+    ], inplace=True)
+
+    # Print for checking
+    # print("Cleaned Goods Columns:", cl2.columns.tolist())
+    # print("Goods Data Shape:", cl2.shape)
+
 
     # ========== Forecasting for Entire Dataset ==============
     feature_cols = ['Lag_1', 'Lag_2'] + ['SUSPENSION', 'SYRUP', 'INJECTABLES', 'TABLET', 'CAPSULE', 'DENTAL', 'IS_BOX']
@@ -418,7 +473,48 @@ def consumption():
 
 @app.route("/suppliers")
 def suppliers():
-    return render_template("dashboard_suppliers.html")
+    global cl2
+
+    if cl2 is None:
+        return render_template("dashboard_suppliers.html", kpis=None)
+
+    try:
+        # === KPI Calculations ===
+        total_grns = cl2['Grn No'].nunique()
+        total_suppliers = cl2['Supplier Name'].nunique()
+        total_items = cl2['Item Name'].nunique()
+
+        total_item_value = cl2['Item Value'].sum()
+        avg_item_value_per_grn = total_item_value / total_grns if total_grns else 0
+        total_rec_qty = cl2['Rec. Qty.'].sum()
+
+        cl2['Lead_Time_Days'] = (cl2['Grn Date'] - cl2['Challan Date']).dt.days
+        avg_lead_time = cl2['Lead_Time_Days'].mean()
+
+        cl2['Days_to_Expiry'] = (cl2['Expiry Date'] - pd.Timestamp.today()).dt.days
+        near_expiry_batches = (cl2['Days_to_Expiry'] < 180).sum()
+
+        price_variance_cases = (cl2['Unit Cost'].round(2) != cl2['PO Unit Rate'].round(2)).sum()
+
+        grn_monthly = cl2.groupby(cl2['Grn Date'].dt.to_period('M')).size()
+        avg_grns_per_month = grn_monthly.mean()
+
+        # === Compile KPIs ===
+        kpis = {
+            'Total GRNs Processed': total_grns,
+            'Total Unique Suppliers': total_suppliers,
+            'Total Item Value (Procured)': round(total_item_value, 2),
+            'Average Lead Time (Days)': round(avg_lead_time, 2),
+            'Near-Expiry Batches (<180 days)': int(near_expiry_batches),
+            'Average GRNs Per Month': round(avg_grns_per_month, 2)
+        }
+
+    except Exception as e:
+        print(f"KPI Calculation Error: {e}")
+        kpis = None
+
+    return render_template("dashboard_suppliers.html", kpis=kpis)
+
 
 @app.route("/forecasting")
 def forecasting():

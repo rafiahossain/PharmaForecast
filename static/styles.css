@@ -348,6 +348,43 @@ body h2 {
   max-width: 100%;
 }
 
+.kpi-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  justify-content: center;
+}
+.kpi-container .kpi-card {
+  background-color: #4cc8f2;
+  color: #061b4f;
+  border-radius: 0.75rem;
+  padding: 0.3rem;
+  min-width: 130px;
+  flex: 1 1 130px;
+  max-width: 100px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+.kpi-container .kpi-card h3 {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #54469b;
+}
+.kpi-container .kpi-card p {
+  margin-top: 0.5rem;
+  font-size: 1rem;
+  font-weight: bold;
+  color: #061b4f;
+}
+.kpi-container .kpi-placeholder {
+  width: 100%;
+  padding: 1rem;
+  border: 2px dashed #bcb1d4;
+  border-radius: 0.75rem;
+  text-align: center;
+  color: #bcb1d4;
+}
+
 @media (max-width: 768px) {
   .layout {
     flex-direction: column;
