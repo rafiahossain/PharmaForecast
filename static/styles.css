@@ -21,6 +21,9 @@
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.3);
   box-sizing: border-box;
 }
+.sidenav h2 {
+  font-size: large;
+}
 .sidenav a {
   padding: 12px 20px;
   text-decoration: none;
@@ -400,6 +403,39 @@ body h2 {
   color: white;
 }
 .plot-container .plot-card img {
+  width: 100%;
+  height: auto;
+  border-radius: 0px;
+}
+
+.expiry-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+.expiry-row .plot-card-1 {
+  flex: 1 1 20%;
+  background-color: #54469b;
+  padding: 0.3rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  color: white;
+}
+.expiry-row .plot-card-1 img {
+  width: 100%;
+  height: auto;
+  border-radius: 0px;
+}
+.expiry-row .plot-card-2 {
+  flex: 1 1 40%;
+  background-color: #54469b;
+  padding: 0.3rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  color: white;
+}
+.expiry-row .plot-card-2 img {
   width: 100%;
   height: auto;
   border-radius: 0px;

@@ -50,7 +50,8 @@ class MyTask(db.Model):
 with app.app_context():
     db.create_all()
     
-# Global storage for modeling results and always-zero items
+# Global storage 
+# For modeling results and always-zero items
 forecast_plot = None
 model_eval_results = []
 always_zero_items_list = []
@@ -65,8 +66,8 @@ box_vs_regular_plot = None
 cl2 = None 
 supplier_dependence_plot = None
 delivery_delay_plot = None
-
-
+expiry_risk_plot = None
+itemvalue_vs_frequency_plot = None
 
 
 # Home Page index, and a route to it
@@ -476,7 +477,7 @@ def consumption():
 @app.route("/suppliers")
 def suppliers():
     global cl2
-    global supplier_dependence_plot, delivery_delay_plot
+    global supplier_dependence_plot, delivery_delay_plot, expiry_risk_plot, itemvalue_vs_frequency_plot
 
     if cl2 is None:
         return render_template("dashboard_suppliers.html", kpis=None)
@@ -595,18 +596,101 @@ def suppliers():
         buf2.seek(0)
         delivery_delay_plot = base64.b64encode(buf2.getvalue()).decode('utf8')
         plt.close()
+        
+        # === Expiry Risk ===
+        cl2['Days_to_Expiry_Today'] = (cl2['Expiry Date'] - pd.Timestamp.today()).dt.days
+        cl2['Expiry_Risk'] = pd.cut(
+            cl2['Days_to_Expiry_Today'],
+            bins=[-9999, 0, 90, 180, 365, 9999],
+            labels=['Expired', '<3 Months', '3-6 Months', '6-12 Months', '>1 Year']
+        )
+
+        expiry_risk_subcat = cl2.groupby(['Sub Category', 'Expiry_Risk'])['Item Value'].sum().unstack().fillna(0)
+
+        top6_subcats = expiry_risk_subcat.sum(axis=1).sort_values(ascending=False).head(6).index
+        expiry_risk_top6 = expiry_risk_subcat.loc[top6_subcats]
+
+        color_map = {
+            'Expired': '#d62728',
+            '<3 Months': '#4C72B0',
+            '3-6 Months': '#4DC8F2',
+            '6-12 Months': '#B6AED4',
+            '>1 Year': '#ffffff'
+        }
+
+        ax = expiry_risk_top6.plot(
+            kind='bar',
+            stacked=True,
+            figsize=(8, 6),
+            color=[color_map.get(x, '#333333') for x in expiry_risk_top6.columns]
+        )
+
+        # Set white text for axis labels and ticks
+        ax.set_ylabel('Total Item Value', color='white')
+        ax.set_xlabel('Sub Category', color='white')
+        ax.tick_params(axis='x', colors='white')
+        ax.tick_params(axis='y', colors='white')
+
+        plt.xticks(rotation=45, ha='right')
+        plt.tight_layout()
+
+        buf3 = io.BytesIO()
+        plt.savefig(buf3, format='png', transparent=True)
+        buf3.seek(0)
+        expiry_risk_plot = base64.b64encode(buf3.getvalue()).decode('utf8')
+        plt.close()
+
+
+        # === Subcategory ItemValue + Frequency ===
+
+        top_subcat_item_value = cl2.groupby('Sub Category')['Item Value'].sum().sort_values(ascending=False).head(10)
+        top_subcat_counts = cl2['Sub Category'].value_counts().reindex(top_subcat_item_value.index)
+
+        fig, ax1 = plt.subplots(figsize=(8, 5))
+
+        color1 = '#4DC8F2'
+        color2 = '#B6AED4'
+
+        ax1.bar(top_subcat_item_value.index, top_subcat_item_value.values, color=color1, width=0.4, align='center')
+        ax1.set_xlabel('Sub Category', color='white')
+        ax1.set_ylabel('Total Item Value', color=color1)
+        ax1.tick_params(axis='y', labelcolor=color1)
+        ax1.tick_params(axis='x', colors='white')
+        ax1.set_xticks(range(len(top_subcat_item_value.index)))
+        ax1.set_xticklabels(top_subcat_item_value.index, rotation=45, ha='right', color='white')
+
+        ax2 = ax1.twinx()
+        ax2.bar([i + 0.4 for i in range(len(top_subcat_counts))], top_subcat_counts.values,
+                color=color2, width=0.4, align='center')
+        ax2.set_ylabel('Frequency', color=color2)
+        ax2.tick_params(axis='y', labelcolor=color2)
+
+        plt.tight_layout()
+
+        buf4 = io.BytesIO()
+        plt.savefig(buf4, format='png', transparent=True)
+        buf4.seek(0)
+        itemvalue_vs_frequency_plot = base64.b64encode(buf4.getvalue()).decode('utf8')
+        plt.close()
+
+        
+        
 
     except Exception as e:
         print(f"KPI Calculation Error: {e}")
         kpis = None
         supplier_dependence_plot = None
         delivery_delay_plot = None
+        expiry_risk_plot = None
+        itemvalue_vs_frequency_plot = None
         
     return render_template(
         "dashboard_suppliers.html",
         kpis=kpis,
         supplier_dependence_plot=supplier_dependence_plot,
-        delivery_delay_plot=delivery_delay_plot
+        delivery_delay_plot=delivery_delay_plot,
+        expiry_risk_plot=expiry_risk_plot,
+        itemvalue_vs_frequency_plot=itemvalue_vs_frequency_plot
     )
 
 

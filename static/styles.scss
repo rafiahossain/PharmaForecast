@@ -31,12 +31,12 @@ $on-dark: #f4f6f8;        // Text on dark backgrounds
   // width: 20%;    // Responsive sidebar width
   flex: 0 0 max(250px, 20%);
   border-radius: 20px;
-  min-width: 250px; // Optional: Prevent being too small
-  max-width: 300px; // Optional: Prevent being too large
+  min-width: 250px; 
+  max-width: 300px; 
   position: fixed;
   top: 0;
   left: 0;
-  background-color: $primary; // ← uses $primary
+  background-color: $primary; 
   padding-top: 30px;
   display: flex;
   flex-direction: column;
@@ -44,11 +44,15 @@ $on-dark: #f4f6f8;        // Text on dark backgrounds
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.3);
   box-sizing: border-box;
 
+  h2 {
+    font-size: large;
+  }
+
   a {
     padding: 12px 20px;
     text-decoration: none;
     font-size: 18px;
-    color: $on-dark; // ← uses $on-dark
+    color: $on-dark; 
     display: block;
     width: 100%;
     text-align: left;
@@ -60,7 +64,7 @@ $on-dark: #f4f6f8;        // Text on dark backgrounds
     overflow-wrap: break-word;
 
     &:hover {
-      background-color: $accent; // ← uses $accent
+      background-color: $accent; 
     }
   }
 }
@@ -553,8 +557,43 @@ body {
   }
 }
 
+// From expiry row
+.expiry-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
 
+  .plot-card-1 {
+    flex: 1 1 20%;
+    background-color: $primary;
+    padding: 0.3rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    color: white;
 
+    img {
+      width: 100%;
+      height: auto;
+      border-radius: 0px;
+    }
+  }
+
+  .plot-card-2 {
+    flex: 1 1 40%;
+    background-color: $primary;
+    padding: 0.3rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    color: white;
+
+    img {
+      width: 100%;
+      height: auto;
+      border-radius: 0px;
+    }
+  }
+}
 
 
 

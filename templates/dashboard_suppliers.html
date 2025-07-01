@@ -23,7 +23,7 @@
     {% endif %}
   </div>
 
-  {% if supplier_dependence_plot and delivery_delay_plot %}
+{% if supplier_dependence_plot and delivery_delay_plot %}
   <div class="plot-container">
     <div class="plot-card">
       <h2>Top 10 Supplier Dependence</h2>
@@ -35,6 +35,24 @@
     </div>
   </div>
 {% endif %}
+
+{% if expiry_risk_plot and itemvalue_vs_frequency_plot %}
+  <div class="expiry-row">
+    <div class="plot-card-1">
+      <h2>Expiry Risk by Sub Category (Top 6)</h2>
+      <img src="data:image/png;base64,{{ expiry_risk_plot }}" alt="Expiry Risk Plot">
+    </div>
+
+    <div class="plot-card-2">
+      <h2>Item Value and Frequency by Sub Category (Top 10)</h2>
+      <img src="data:image/png;base64,{{ itemvalue_vs_frequency_plot }}" alt="Item Value vs Frequency Plot">
+    </div>
+  </div>
+{% endif %}
+
+
+
+
 
 
 
