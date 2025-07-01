@@ -53,7 +53,7 @@ footer {
 body {
   font-family: Cambria, Cochin, Georgia, Times, "Times New Roman", serif;
   margin: 0;
-  margin-left: max(250px, 2%);
+  margin-left: max(270px, 10%);
   padding: 0;
   background-color: #33346c;
   color: #bcb1d4;
@@ -340,7 +340,7 @@ body h2 {
   max-width: 100%;
 }
 .consumption-bottom .chart-small {
-  flex: 0 0 31%;
+  flex: 0 0 30.5%;
   min-width: 190px;
   background-color: #54469b;
   border-radius: 0.75rem;

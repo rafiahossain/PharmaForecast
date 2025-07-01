@@ -1,34 +1,28 @@
-// ----------------------
-// 🎨 Color Variables
-// ----------------------
+// ######################################
+// Color Variables
+// ######################################
 
-// Brand Colors
 $primary: #54469b;        // Sidebar, table cells
 $primary-light: #8c70ae;  // Header text, hover highlights
 $accent: #4cc8f2;         // Action buttons (edit/delete, links)
-
-// Status Colors
 $bg-dark: #33346c;        // Page background, add button
 $bg-darker: #061d5d;      // Add button hover, secondary emphasis
 $text-light: #bcb1d4;     // Titles, link hover text
-
-// UI Colors
 $surface: #061b4f;        // Content card background
 $on-dark: #f4f6f8;        // Text on dark backgrounds
 
 .layout {
   display: flex;
-  padding: 30px; // Space from the edges of the screen
-  gap: 10px;     // Space between sidenav and content
+  padding: 30px; 
+  gap: 10px; // Space between sidenav and content
 }
 
-// -------------------------
-// Styling Side Nav Bar
-// -------------------------
+// ######################################
+// Side Nav Bar
+// ######################################
 
 .sidenav {
   height: 100vh;
-  // width: 20%;    // Responsive sidebar width
   flex: 0 0 max(250px, 20%);
   border-radius: 20px;
   min-width: 250px; 
@@ -69,9 +63,9 @@ $on-dark: #f4f6f8;        // Text on dark backgrounds
   }
 }
 
-// ----------------------
-// Styling Footer
-// ----------------------
+// ######################################
+// Footer
+// ######################################
 
 footer {
   margin-top: 50px;
@@ -80,18 +74,17 @@ footer {
   color: $text-light;
 }
 
-
-// ----------------------
-// Styling Pages
-// ----------------------
+// ######################################
+// Pages
+// ######################################
 
 body {
   font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
   margin: 0;
-  margin-left: max(250px, 2%);
+  margin-left: max(270px, 10%);
   padding: 0;
-  background-color: $bg-dark; // ← uses $bg-dark
-  color: $text-light;         // ← uses $text-light
+  background-color: $bg-dark; 
+  color: $text-light;         
   text-align: center;
 
   h1 {
@@ -110,26 +103,23 @@ body {
   text-align: justify;
 }
 
-
 .content {
   max-width: 100%;
-  // width: calc(100% - max(250px, 20%)); // dynamic based on sidebar
   flex: 1;
   border-radius: 30px;
   padding: 0 30px 30px;
-  background-color: $surface;     // ← uses $surface
+  background-color: $surface;     
   border-radius: 30px;
   text-align: center;
 
   .content .chart-container {
     width: 100%;
     max-width: 100%;
-    overflow-x: auto;  // Optional, adds scroll if needed
+    overflow-x: auto;  //adds scroll if needed
   }
 
-
   h1 {
-    color: $text-light;           // ← uses $text-light
+    color: $text-light;           
   }
 
   h2 {
@@ -137,12 +127,12 @@ body {
   }
 
   h4 {
-    color: $bg-darker;            // ← uses $bg-darker
+    color: $bg-darker;            
   }
 
-  // ----------------------
+  // ######################################
   // Dataset Page
-  // ----------------------
+  // ######################################
   .dataset-container {
     display: flex;
     justify-content: space-between;
@@ -153,7 +143,7 @@ body {
 
     .dataset-box {
       flex: 1;
-      min-width: 0; // ensures shrinkable content
+      min-width: 0; // shrinkable content
       background-color: $primary;
       padding: 1.5rem;
       border-radius: 0.75rem;
@@ -245,8 +235,10 @@ body {
     font-size: 18px;
   }
 
+  // ######################################
   //From Index Html
   //inherit qualities from <input>
+  //######################################
   #btn_add_task {
     background-color: $bg-dark;     
     color: $on-dark;                 
@@ -258,8 +250,10 @@ body {
     }
   }
 
+  // ######################################
   // From Data Entry Html 
   // Does not inherit qualities from <input> because its <button>
+  // ######################################
   #btn_upload_files {
     background-color: $bg-dark;      
     color: $on-dark;                
@@ -277,9 +271,9 @@ body {
   }
 }
 
-// ---------------------------
+// ######################################
 // Forecasting Dashboard Layout
-// ---------------------------
+// ######################################
 
 .forecast-top,
 .forecast-bottom {
@@ -312,7 +306,7 @@ body {
   align-items: center;
   flex-direction: column;
   text-align: center;
-  min-height: 220px; // makes ure there is visibly centred even if parent container is small
+  min-height: 220px; // makes ure visibly centred even if parent container is small
 }
 
 // .overall-forecast-box {
@@ -351,9 +345,9 @@ body {
 
 
 
-// ---------------------------
+// ######################################
 // Always-Zero Items
-// ---------------------------
+// ######################################
 
 .zero-items-box {
   background-color: $primary;
@@ -394,9 +388,9 @@ body {
   }
 }
 
-// ---------------------------
+// ######################################
 // CONSUMPTION OVERVIEW DASHBOARD
-// ---------------------------
+// ######################################
 
 .consumption-overview {
   display: flex;
@@ -474,7 +468,7 @@ body {
   }
 
   .chart-small {
-    flex: 0 0 31%;
+    flex: 0 0 30.5%;
     min-width: 190px;
     background-color: $primary;
     border-radius: 0.75rem;
@@ -492,9 +486,9 @@ body {
   }
 }
 
-// ---------------------------
+// ######################################
 // SUPPLY CHAIN RISKS DASHBOARD
-// ---------------------------
+// ######################################
 
 .kpi-container {
   display: flex;
@@ -598,15 +592,11 @@ body {
   }
 }
 
-
 // Expiry table
-
-//$border-color: #444;
 
 .expiry-table {
   background-color: $primary;
   color: $on-dark;
-  // border-color: $border-color;
 
   th {
     background-color: $accent;
@@ -626,23 +616,10 @@ body {
   }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ---------------------------
+// ######################################
 //MEDIA QUERY FOR SCREEN SIZES
 //FLEXBOX
-// ---------------------------
+// ######################################
 
 @media (max-width: 768px) {
   .layout {
