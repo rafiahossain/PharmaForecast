@@ -69,6 +69,10 @@ body h2 {
   font-size: medium;
 }
 
+.project-objectives {
+  text-align: justify;
+}
+
 .content {
   max-width: 100%;
   flex: 1;
@@ -439,6 +443,24 @@ body h2 {
   width: 100%;
   height: auto;
   border-radius: 0px;
+}
+
+.expiry-table {
+  background-color: #54469b;
+  color: #f4f6f8;
+}
+.expiry-table th {
+  background-color: #4cc8f2;
+  color: #061b4f;
+}
+.expiry-table td, .expiry-table th {
+  padding: 10px;
+  text-align: center;
+}
+
+.table-section h3 {
+  margin-top: 40px;
+  color: #f4f6f8;
 }
 
 @media (max-width: 768px) {

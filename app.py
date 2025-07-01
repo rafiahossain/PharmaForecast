@@ -1,8 +1,7 @@
 # Imports
 from flask import Flask, render_template, redirect, request
 from flask_scss import Scss
-from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+# from flask_sqlalchemy import SQLAlchemy
 # To upload files in data entry page
 import os
 from werkzeug.utils import secure_filename
@@ -10,14 +9,13 @@ from werkzeug.utils import secure_filename
 import pandas as pd
 import numpy as np
 import re
-# For forecasting
-# For forecasting
 import matplotlib
-matplotlib.use('Agg')  # ✅ Add this line
+matplotlib.use('Agg') 
 import matplotlib.pyplot as plt
 import seaborn as sns
 import base64
 import io
+# For forecasting
 from sklearn.linear_model import LinearRegression, Ridge, Lasso
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.neural_network import MLPRegressor
@@ -33,22 +31,12 @@ app = Flask(__name__)
 Scss(app)
 
 # configure the SQLite database, relative to the app instance folder
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///pharmaDB.db"
-app.config["SQLALCHEMY_TRACK_MODIFICATION"] = False
-db = SQLAlchemy(app)
+# app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///pharmaDB.db"
+# app.config["SQLALCHEMY_TRACK_MODIFICATION"] = False
+# db = SQLAlchemy(app)
 
-# ~ kind of a Data class ~ Row of data
-class MyTask(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    content = db.Column(db.String(100), nullable=False)
-    complete = db.Column(db.Integer, default=0)
-    created = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    def __repr__(self) -> str:
-        return f"Task {self.id}"
-
-with app.app_context():
-    db.create_all()
+# with app.app_context():
+#     db.create_all()
     
 # Global storage 
 # For modeling results and always-zero items
@@ -69,53 +57,10 @@ delivery_delay_plot = None
 expiry_risk_plot = None
 itemvalue_vs_frequency_plot = None
 
-
 # Home Page index, and a route to it
-@app.route("/",methods=["POST","GET"])
+@app.route("/")
 def index():
-    # Add a task
-    if request.method == "POST":
-        current_task = request.form['content']
-        new_task = MyTask(content=current_task)
-        try:
-            db.session.add(new_task)
-            db.session.commit()
-            return redirect("/")
-        except Exception as e:
-            print(f"ERROR:{e}")
-            return f"ERROR:{e}"
-    # See all current tasks
-    else:
-        tasks = MyTask.query.order_by(MyTask.created).all()
-        return render_template("index.html", tasks=tasks)
-
-# DELETE an item
-@app.route("/delete/<int:id>")
-def delete(id:int):
-    delete_task = MyTask.query.get_or_404(id)
-    try:
-        db.session.delete(delete_task)
-        db.session.commit()
-        return redirect("/") # redirects back to home page
-    except Exception as e:
-        return f"ERROR:{e}"
-    # button only appears if we have the task
-    # so we dont have to validate if task exists first
-    # so 404 should not occur
-
-# Edit an item
-@app.route("/edit/<int:id>", methods=["GET","POST"])
-def edit(id:int):
-    task = MyTask.query.get_or_404(id)
-    if request.method == "POST":
-        task.content = request.form['content']
-        try:
-            db.session.commit()
-            return redirect("/")
-        except Exception as e:
-            return f"ERROR:{e}"
-    else: # create a new edit webpage
-        return render_template('edit.html',task=task)
+    return render_template("index.html")
 
 ######################################
 
@@ -478,6 +423,7 @@ def consumption():
 def suppliers():
     global cl2
     global supplier_dependence_plot, delivery_delay_plot, expiry_risk_plot, itemvalue_vs_frequency_plot
+    # global expiry_table
 
     if cl2 is None:
         return render_template("dashboard_suppliers.html", kpis=None)
@@ -672,9 +618,26 @@ def suppliers():
         buf4.seek(0)
         itemvalue_vs_frequency_plot = base64.b64encode(buf4.getvalue()).decode('utf8')
         plt.close()
+        
+        # === Table for Items Expiring in <3 Months or Expired ===
 
-        
-        
+        expiry_3_months = cl2[(cl2['Expiry_Risk'] == '<3 Months') & (cl2['Days_to_Expiry_Today'] >= 0)]
+
+        expiry_display = expiry_3_months[[
+            'Item Name', 'Sub Category', 'Supplier Name', 'Batch No',
+            'Expiry Date', 'Days_to_Expiry_Today', 'Item Value'
+        ]].sort_values('Days_to_Expiry_Today').reset_index(drop=True)
+
+        expiry_display['Days_to_Expiry_Today'] = expiry_display['Days_to_Expiry_Today'].astype(int)
+        expiry_display['Item Value'] = expiry_display['Item Value'].round(2)
+
+        # Convert to HTML table
+        expiry_table_html = expiry_display.to_html(
+            classes='table table-striped table-bordered table-hover expiry-table',
+            index=False,
+            border=0,
+            justify='center'
+        )
 
     except Exception as e:
         print(f"KPI Calculation Error: {e}")
@@ -690,7 +653,8 @@ def suppliers():
         supplier_dependence_plot=supplier_dependence_plot,
         delivery_delay_plot=delivery_delay_plot,
         expiry_risk_plot=expiry_risk_plot,
-        itemvalue_vs_frequency_plot=itemvalue_vs_frequency_plot
+        itemvalue_vs_frequency_plot=itemvalue_vs_frequency_plot,
+        expiry_table=expiry_table_html
     )
 
 
@@ -879,10 +843,6 @@ def data_entry():
 @app.route("/dataset")
 def dataset():
     return render_template("dataset.html")
-
-# @app.route("/performance")
-# def performance():
-#     return render_template("performance.html")
 
 # RUNNER and DEBUGGER
 # Keep Flask updating itself

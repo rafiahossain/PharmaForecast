@@ -6,33 +6,20 @@
 
 {% block body %}
     <div class="content">
-        <h1>Today's Stack</h1>
-        
-        {% if tasks | length <1%}
-        <h3>There are no tasks... Create one here!</h3>
-        {% else %}
-        <table>
-            <tr>
-                <th>Task</th>
-                <th>Added</th>
-                <th>Actions</th>
-            </tr>
-            {% for task in tasks %}
-                <tr>
-                    <td>{{task.content}}</td>
-                    <td>{{task.created.strftime("%Y-%m-%d")}}</td>
-                    <td>
-                        <a href="/delete/{{task.id}}">Delete</a>
-                        <br/>
-                        <a href="/edit/{{task.id}}">Edit</a>
-                    </td>
-                </tr>
-            {% endfor %}
-        </table>
-        {% endif %}
-        <form action="/" method="POST">
-            <input type="text" name="content" id="content" />
-            <input type="submit" value="Add Task" id="btn_add_task"/>
-        </form>
+        <h1>Demand Forecasting for Supply Chain Risk Management</h1>
+
+        <h2>Problem Statement</h2>
+        <div class="project-objectives">
+        <p>In Pharmaceutical supply chains, effective inventory management is difficult due to irregular demand trends across different products. The mismatch in the demand-and-supply in production can lead to overstocking, stockouts and inefficient resource management. One major contribution to this problem is the lack of timely data-backed insights into consumption trends, supplier risks and delays which is necessary to prepare for demand and to make informed inventory decisions. Hence, it is essential to use predictive modelling on updated and current consumption data to support and enhance inventory planning. </p>
+        </div>
+
+        <h2>Project Objectives</h2>
+        <div class="project-objectives">
+            <ul>
+                <li>To analyze supplier and product risks and patterns in order to support short term inventory management.</li>
+                <li>To develop a demand forecasting tool using regression models for upcoming inventory planning to reduce overstocking or stockout.</li>
+                <li>To evaluate and compare the performance of the demand predictions models.</li>
+            </ul>
+        </div>
     </div>
 {% endblock %}

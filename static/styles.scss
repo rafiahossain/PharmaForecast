@@ -106,6 +106,9 @@ body {
   }
 }
 
+.project-objectives {
+  text-align: justify;
+}
 
 
 .content {
@@ -596,6 +599,32 @@ body {
 }
 
 
+// Expiry table
+
+//$border-color: #444;
+
+.expiry-table {
+  background-color: $primary;
+  color: $on-dark;
+  // border-color: $border-color;
+
+  th {
+    background-color: $accent;
+    color: $surface;
+  }
+
+  td, th {
+    padding: 10px;
+    text-align: center;
+  }
+}
+
+.table-section {
+  h3 {
+    margin-top: 40px;
+    color: $on-dark;
+  }
+}
 
 
 
