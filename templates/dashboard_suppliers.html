@@ -17,11 +17,25 @@
     {% else %}
       <div class="kpi-placeholder">
         <p style="color: white; font-weight: bold;">
-          No data loaded. Please upload the data to view KPIs.
+          No data loaded. Please upload the data to view Dashboard.
         </p>
       </div>
     {% endif %}
   </div>
+
+  {% if supplier_dependence_plot and delivery_delay_plot %}
+  <div class="plot-container">
+    <div class="plot-card">
+      <h2>Top 10 Supplier Dependence</h2>
+      <img src="data:image/png;base64,{{ supplier_dependence_plot }}" alt="Supplier Dependence Plot">
+    </div>
+    <div class="plot-card">
+      <h2>Suppliers with Delivery Delays</h2>
+      <img src="data:image/png;base64,{{ delivery_delay_plot }}" alt="Delivery Delay Plot">
+    </div>
+  </div>
+{% endif %}
+
 
 
 {% endblock %}

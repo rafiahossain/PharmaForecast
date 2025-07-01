@@ -22,12 +22,9 @@ $on-dark: #f4f6f8;        // Text on dark backgrounds
   gap: 10px;     // Space between sidenav and content
 }
 
-
 // -------------------------
-// 😽 Styling Side Nav Bar
+// Styling Side Nav Bar
 // -------------------------
-
-
 
 .sidenav {
   height: 100vh;
@@ -69,7 +66,7 @@ $on-dark: #f4f6f8;        // Text on dark backgrounds
 }
 
 // ----------------------
-// 🥰 Styling Footer
+// Styling Footer
 // ----------------------
 
 footer {
@@ -81,7 +78,7 @@ footer {
 
 
 // ----------------------
-// 😁 Styling Pages
+// Styling Pages
 // ----------------------
 
 body {
@@ -137,7 +134,7 @@ body {
   }
 
   // ----------------------
-  // 😁 Dataset Page
+  // Dataset Page
   // ----------------------
   .dataset-container {
     display: flex;
@@ -193,27 +190,27 @@ body {
     th,
     td {
       padding: 10px;
-      border: 1px solid $surface;     // ← uses $surface
-      background-color: $primary;     // ← uses $primary
-      color: $on-dark;                // ← uses $on-dark
+      border: 1px solid $surface;     
+      background-color: $primary;     
+      color: $on-dark;                
       font-size: small;
     }
 
     th {
-      color: $surface;                // ← uses $surface
+      color: $surface;                
     }
 
     button {
-      background-color: $accent;      // ← uses $accent
+      background-color: $accent;      
       border: none;
       padding: 8px 12px;
       border-radius: 20px;
-      color: $on-dark;                // ← uses $on-dark
+      color: $on-dark;                
       cursor: pointer;
       transition: background-color 0.3s ease;
 
       &:hover {
-        background-color: $text-light; // ← uses $text-light
+        background-color: $text-light; 
       }
     }
   }
@@ -223,13 +220,13 @@ body {
     padding: 8px 16px;
     margin: 5px;
     border-radius: 20px;
-    background-color: $accent;       // ← uses $accent
-    color: $on-dark;                 // ← uses $on-dark
+    background-color: $accent;       
+    color: $on-dark;                 
     text-decoration: none;
     transition: background-color 0.3s ease;
 
     &:hover {
-      background-color: $text-light; // ← uses $text-light
+      background-color: $text-light; 
     }
   }
 
@@ -244,21 +241,21 @@ body {
   //From Index Html
   //inherit qualities from <input>
   #btn_add_task {
-    background-color: $bg-dark;      // ← uses $bg-dark
-    color: $on-dark;                 // ← uses $on-dark
+    background-color: $bg-dark;     
+    color: $on-dark;                 
     cursor: pointer;
     font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
 
     &:hover {
-      background-color: $bg-darker;  // ← uses $bg-darker
+      background-color: $bg-darker;  
     }
   }
 
-  //From Data Entry Html 
+  // From Data Entry Html 
   // Does not inherit qualities from <input> because its <button>
   #btn_upload_files {
-    background-color: $bg-dark;      // ← uses $bg-dark
-    color: $on-dark;                 // ← uses $on-dark
+    background-color: $bg-dark;      
+    color: $on-dark;                
     cursor: pointer;
     font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
     margin: 20px 5px 5px 5px;
@@ -268,13 +265,13 @@ body {
     font-size: 18px;
 
     &:hover {
-      background-color: $bg-darker;  // ← uses $bg-darker
+      background-color: $bg-darker; 
     }
   }
 }
 
 // ---------------------------
-// 📊 Forecasting Dashboard Layout
+// Forecasting Dashboard Layout
 // ---------------------------
 
 .forecast-top,
@@ -308,7 +305,7 @@ body {
   align-items: center;
   flex-direction: column;
   text-align: center;
-  min-height: 220px; // optional: ensures visible centering even if parent is small
+  min-height: 220px; // makes ure there is visibly centred even if parent container is small
 }
 
 // .overall-forecast-box {
@@ -323,7 +320,7 @@ body {
 //   padding: 0.75rem;
 //   border-radius: 0.75rem;
 //   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-//   min-height: 200px; // Optional: adjusts vertical space
+//   min-height: 200px; 
 
 //   img {
 //     max-width: 100%;
@@ -390,15 +387,9 @@ body {
   }
 }
 
-
-
 // ---------------------------
-
 // CONSUMPTION OVERVIEW DASHBOARD
-
 // ---------------------------
-
-
 
 .consumption-overview {
   display: flex;
@@ -450,8 +441,6 @@ body {
 }
 
 // BOTTOM CHARTS
-
-
 .consumption-bottom {
   display: flex;
   justify-content: space-between;
@@ -497,9 +486,7 @@ body {
 }
 
 // ---------------------------
-
 // SUPPLY CHAIN RISKS DASHBOARD
-
 // ---------------------------
 
 .kpi-container {
@@ -543,6 +530,28 @@ body {
   }
 }
 
+// AFTER KPI ROW
+.plot-container {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+
+  .plot-card {
+    flex: 1 1 30%;
+    background-color: $primary;
+    padding: 0.3rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    color: white;
+
+    img {
+      width: 100%;
+      height: auto;
+      border-radius: 0px;
+    }
+  }
+}
 
 
 
@@ -563,10 +572,8 @@ body {
 
 
 // ---------------------------
-
 //MEDIA QUERY FOR SCREEN SIZES
 //FLEXBOX
-
 // ---------------------------
 
 @media (max-width: 768px) {

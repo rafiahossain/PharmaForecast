@@ -63,6 +63,8 @@ avg_consumption_plot = None
 box_vs_regular_plot = None
 # For GRN data
 cl2 = None 
+supplier_dependence_plot = None
+delivery_delay_plot = None
 
 
 
@@ -474,6 +476,7 @@ def consumption():
 @app.route("/suppliers")
 def suppliers():
     global cl2
+    global supplier_dependence_plot, delivery_delay_plot
 
     if cl2 is None:
         return render_template("dashboard_suppliers.html", kpis=None)
@@ -508,12 +511,103 @@ def suppliers():
             'Near-Expiry Batches (<180 days)': int(near_expiry_batches),
             'Average GRNs Per Month': round(avg_grns_per_month, 2)
         }
+        
+        # ======= Generate Supplier Dependence Plot =======
+        delayed_suppliers = (
+            cl2.groupby('Supplier Name')['Lead_Time_Days']
+            .mean()
+            .loc[lambda x: x > 0]
+            .index.tolist()
+        )
+
+        supplier_value = cl2.groupby('Supplier Name')['Item Value'].sum().sort_values(ascending=False)
+        supplier_share = supplier_value / supplier_value.sum() * 100
+        top_suppliers = supplier_share.head(10)
+
+        colors1 = ['#4DC8F2' if supplier in delayed_suppliers else 'yellow' for supplier in top_suppliers.index]
+
+        plt.figure(figsize=(6, 4))
+        top_suppliers.plot(kind='barh', color=colors1)
+
+        plt.xlabel('% of Total Item Value', color='white')
+        plt.ylabel('Supplier Name', color='white')
+
+        plt.xticks(color='white')
+        plt.yticks(color='white')
+
+        plt.gca().invert_yaxis()
+
+        # White spines
+        plt.gca().spines['bottom'].set_color('white')
+        plt.gca().spines['left'].set_color('white')
+        plt.gca().spines['top'].set_color('white')
+        plt.gca().spines['right'].set_color('white')
+
+        plt.gca().tick_params(colors='white')
+
+        # Transparent background
+        plt.gca().set_facecolor('none')
+        plt.gcf().set_facecolor('none')
+
+        plt.tight_layout()
+
+        buf1 = io.BytesIO()
+        plt.savefig(buf1, format='png', transparent=True)
+        buf1.seek(0)
+        supplier_dependence_plot = base64.b64encode(buf1.getvalue()).decode('utf8')
+        plt.close()
+
+        # ======= Generate Delivery Delay Plot =======
+        delivery_delay_supplier = (
+            cl2.groupby('Supplier Name')['Lead_Time_Days']
+            .mean()
+            .loc[lambda x: x > 0]
+            .sort_values(ascending=False)
+        )
+
+        colors2 = ['#4DC8F2' if supplier in top_suppliers.index else 'firebrick' for supplier in delivery_delay_supplier.index]
+
+        plt.figure(figsize=(6, 4))
+        delivery_delay_supplier.plot(kind='barh', color=colors2)
+
+        plt.xlabel('Average Delivery Delay (Days)', color='white')
+        plt.ylabel('Supplier Name', color='white')
+
+        plt.xticks(color='white')
+        plt.yticks(color='white')
+
+        plt.gca().invert_yaxis()
+
+        plt.gca().spines['bottom'].set_color('white')
+        plt.gca().spines['left'].set_color('white')
+        plt.gca().spines['top'].set_color('white')
+        plt.gca().spines['right'].set_color('white')
+
+        plt.gca().tick_params(colors='white')
+
+        plt.gca().set_facecolor('none')
+        plt.gcf().set_facecolor('none')
+
+        plt.tight_layout()
+
+        buf2 = io.BytesIO()
+        plt.savefig(buf2, format='png', transparent=True)
+        buf2.seek(0)
+        delivery_delay_plot = base64.b64encode(buf2.getvalue()).decode('utf8')
+        plt.close()
 
     except Exception as e:
         print(f"KPI Calculation Error: {e}")
         kpis = None
-
-    return render_template("dashboard_suppliers.html", kpis=kpis)
+        supplier_dependence_plot = None
+        delivery_delay_plot = None
+        
+    return render_template(
+        "dashboard_suppliers.html",
+        kpis=kpis,
+        supplier_dependence_plot=supplier_dependence_plot,
+        delivery_delay_plot=delivery_delay_plot
+    )
 
 
 @app.route("/forecasting")

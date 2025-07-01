@@ -385,6 +385,26 @@ body h2 {
   color: #bcb1d4;
 }
 
+.plot-container {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+.plot-container .plot-card {
+  flex: 1 1 30%;
+  background-color: #54469b;
+  padding: 0.3rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  color: white;
+}
+.plot-container .plot-card img {
+  width: 100%;
+  height: auto;
+  border-radius: 0px;
+}
+
 @media (max-width: 768px) {
   .layout {
     flex-direction: column;
