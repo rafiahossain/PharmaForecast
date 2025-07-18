@@ -6,9 +6,9 @@ __pycache__/
 env/
 
 # Flask instance and DB
-instance/
-pharmaDB.db
+*.db
 *.xlsx
+*.txt
 .env
 *.png
 
