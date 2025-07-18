@@ -68,7 +68,7 @@ $on-dark: #f4f6f8;        // Text on dark backgrounds
 // ######################################
 
 footer {
-  margin-top: 50px;
+  margin-top: 0px;
   padding: 20px 0;
   text-align: center;
   color: $text-light;
@@ -143,6 +143,7 @@ body {
 
     .dataset-box {
       flex: 1;
+      font-size: small;
       min-width: 0; // shrinkable content
       background-color: $primary;
       padding: 1.5rem;
@@ -173,6 +174,15 @@ body {
         text-align:justify;
       }
     }
+
+    .dataset-image {
+      max-width: 100%;
+      height: auto;
+      margin-top: 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
   }
 
   table {
