@@ -21,6 +21,9 @@
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.3);
   box-sizing: border-box;
 }
+.sidenav h2 {
+  font-size: large;
+}
 .sidenav a {
   padding: 12px 20px;
   text-decoration: none;
@@ -41,7 +44,7 @@
 }
 
 footer {
-  margin-top: 50px;
+  margin-top: 0px;
   padding: 20px 0;
   text-align: center;
   color: #bcb1d4;
@@ -50,7 +53,7 @@ footer {
 body {
   font-family: Cambria, Cochin, Georgia, Times, "Times New Roman", serif;
   margin: 0;
-  margin-left: max(250px, 2%);
+  margin-left: max(270px, 10%);
   padding: 0;
   background-color: #33346c;
   color: #bcb1d4;
@@ -64,6 +67,10 @@ body h2 {
   padding-top: 0;
   padding-bottom: 10px;
   font-size: medium;
+}
+
+.project-objectives {
+  text-align: justify;
 }
 
 .content {
@@ -99,6 +106,7 @@ body h2 {
 }
 .content .dataset-container .dataset-box {
   flex: 1;
+  font-size: small;
   min-width: 0;
   background-color: #54469b;
   padding: 1.5rem;
@@ -124,6 +132,13 @@ body h2 {
 }
 .content .dataset-container .dataset-box li {
   text-align: justify;
+}
+.content .dataset-container .dataset-image {
+  max-width: 100%;
+  height: auto;
+  margin-top: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 .content table {
   width: 100%;
@@ -333,7 +348,7 @@ body h2 {
   max-width: 100%;
 }
 .consumption-bottom .chart-small {
-  flex: 0 0 31%;
+  flex: 0 0 30.5%;
   min-width: 190px;
   background-color: #54469b;
   border-radius: 0.75rem;
@@ -346,6 +361,114 @@ body h2 {
 }
 .consumption-bottom .chart-small img {
   max-width: 100%;
+}
+
+.kpi-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  justify-content: center;
+}
+.kpi-container .kpi-card {
+  background-color: #4cc8f2;
+  color: #061b4f;
+  border-radius: 0.75rem;
+  padding: 0.3rem;
+  min-width: 130px;
+  flex: 1 1 130px;
+  max-width: 100px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+.kpi-container .kpi-card h3 {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #54469b;
+}
+.kpi-container .kpi-card p {
+  margin-top: 0.5rem;
+  font-size: 1rem;
+  font-weight: bold;
+  color: #061b4f;
+}
+.kpi-container .kpi-placeholder {
+  width: 100%;
+  padding: 1rem;
+  border: 2px dashed #bcb1d4;
+  border-radius: 0.75rem;
+  text-align: center;
+  color: #bcb1d4;
+}
+
+.plot-container {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+.plot-container .plot-card {
+  flex: 1 1 30%;
+  background-color: #54469b;
+  padding: 0.3rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  color: white;
+}
+.plot-container .plot-card img {
+  width: 100%;
+  height: auto;
+  border-radius: 0px;
+}
+
+.expiry-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+.expiry-row .plot-card-1 {
+  flex: 1 1 20%;
+  background-color: #54469b;
+  padding: 0.3rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  color: white;
+}
+.expiry-row .plot-card-1 img {
+  width: 100%;
+  height: auto;
+  border-radius: 0px;
+}
+.expiry-row .plot-card-2 {
+  flex: 1 1 40%;
+  background-color: #54469b;
+  padding: 0.3rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  color: white;
+}
+.expiry-row .plot-card-2 img {
+  width: 100%;
+  height: auto;
+  border-radius: 0px;
+}
+
+.expiry-table {
+  background-color: #54469b;
+  color: #f4f6f8;
+}
+.expiry-table th {
+  background-color: #4cc8f2;
+  color: #061b4f;
+}
+.expiry-table td, .expiry-table th {
+  padding: 10px;
+  text-align: center;
+}
+
+.table-section h3 {
+  margin-top: 40px;
+  color: #f4f6f8;
 }
 
 @media (max-width: 768px) {

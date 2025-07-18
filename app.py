@@ -1,8 +1,7 @@
 # Imports
 from flask import Flask, render_template, redirect, request
 from flask_scss import Scss
-from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+# from flask_sqlalchemy import SQLAlchemy
 # To upload files in data entry page
 import os
 from werkzeug.utils import secure_filename
@@ -10,14 +9,13 @@ from werkzeug.utils import secure_filename
 import pandas as pd
 import numpy as np
 import re
-# For forecasting
-# For forecasting
 import matplotlib
-matplotlib.use('Agg')  # ✅ Add this line
+matplotlib.use('Agg') 
 import matplotlib.pyplot as plt
 import seaborn as sns
 import base64
 import io
+# For forecasting
 from sklearn.linear_model import LinearRegression, Ridge, Lasso
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.neural_network import MLPRegressor
@@ -33,24 +31,18 @@ app = Flask(__name__)
 Scss(app)
 
 # configure the SQLite database, relative to the app instance folder
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///pharmaDB.db"
-app.config["SQLALCHEMY_TRACK_MODIFICATION"] = False
-db = SQLAlchemy(app)
+# app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///pharmaDB.db"
+# app.config["SQLALCHEMY_TRACK_MODIFICATION"] = False
+# db = SQLAlchemy(app)
 
-# ~ kind of a Data class ~ Row of data
-class MyTask(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    content = db.Column(db.String(100), nullable=False)
-    complete = db.Column(db.Integer, default=0)
-    created = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    def __repr__(self) -> str:
-        return f"Task {self.id}"
+# with app.app_context():
+#     db.create_all()
 
-with app.app_context():
-    db.create_all()
-    
-# Global storage for modeling results and always-zero items
+######################################  
+# Global variables for storing 
+######################################
+
+# For modeling results and always-zero items
 forecast_plot = None
 model_eval_results = []
 always_zero_items_list = []
@@ -61,78 +53,39 @@ consumption_plot = None
 stock_status_plot = None
 avg_consumption_plot = None
 box_vs_regular_plot = None
-
-
-
-
-# Home Page index, and a route to it
-@app.route("/",methods=["POST","GET"])
-def index():
-    # Add a task
-    if request.method == "POST":
-        current_task = request.form['content']
-        new_task = MyTask(content=current_task)
-        try:
-            db.session.add(new_task)
-            db.session.commit()
-            return redirect("/")
-        except Exception as e:
-            print(f"ERROR:{e}")
-            return f"ERROR:{e}"
-    # See all current tasks
-    else:
-        tasks = MyTask.query.order_by(MyTask.created).all()
-        return render_template("index.html", tasks=tasks)
-
-# DELETE an item
-@app.route("/delete/<int:id>")
-def delete(id:int):
-    delete_task = MyTask.query.get_or_404(id)
-    try:
-        db.session.delete(delete_task)
-        db.session.commit()
-        return redirect("/") # redirects back to home page
-    except Exception as e:
-        return f"ERROR:{e}"
-    # button only appears if we have the task
-    # so we dont have to validate if task exists first
-    # so 404 should not occur
-
-# Edit an item
-@app.route("/edit/<int:id>", methods=["GET","POST"])
-def edit(id:int):
-    task = MyTask.query.get_or_404(id)
-    if request.method == "POST":
-        task.content = request.form['content']
-        try:
-            db.session.commit()
-            return redirect("/")
-        except Exception as e:
-            return f"ERROR:{e}"
-    else: # create a new edit webpage
-        return render_template('edit.html',task=task)
+# For GRN data
+cl2 = None 
+supplier_dependence_plot = None
+delivery_delay_plot = None
+expiry_risk_plot = None
+itemvalue_vs_frequency_plot = None
 
 ######################################
+# Home Page index, and a route to it
+######################################
+@app.route("/")
+def index():
+    return render_template("index.html")
 
+######################################
 # Upload File in Data entry page
-
 ######################################
 # Configure upload folder
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB max size
-# app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024  # 32 MB
-
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB maximum size
 
 @app.route("/upload-data", methods=["POST"])
 def upload_data():
-    # global forecast_plot, model_eval_results, always_zero_items_list, forecast_months
+    # global forecasting variables
     global forecast_plot, model_eval_results, always_zero_items_list, forecast_months, overall_forecast_plot
-    # for cons overview page
+    # for consumption overview page
     global consumption_plot, stock_status_plot, avg_consumption_plot, box_vs_regular_plot
+    # for grn data
+    global cl2
 
-    # Clear previous state
+    # clear previous state
     forecast_plot = None
     model_eval_results = []
     always_zero_items_list = []
@@ -143,7 +96,7 @@ def upload_data():
     avg_consumption_plot = None
     box_vs_regular_plot = None
 
-    # File handling
+    # files
     goods_file = request.files.get("goods_file")
     consumption_file = request.files.get("consumption_file")
     if not goods_file or not consumption_file:
@@ -154,7 +107,9 @@ def upload_data():
     goods_file.save(goods_path)
     consumption_file.save(consumption_path)
 
-    # Data loading & preprocessing
+    ######################################
+    # preprocess consumption data
+    ######################################
     try:
         df = pd.read_excel(consumption_path, skiprows=10, header=0)
     except Exception as e:
@@ -185,7 +140,7 @@ def upload_data():
     df = pd.concat([df, df["ItemName"].apply(get_item_type_flags)], axis=1)
     df["IS_BOX"] = df["Unit Name"].apply(lambda x: "BOX" in str(x).upper()).astype(int)
 
-    # Melt the date columns
+    # melt the date columns to long format
     month_columns = [col for col in df.columns if re.match(r'^[A-Za-z]{3} \d{4}$', col)]
     df_melted = df.melt(
         id_vars=[col for col in df.columns if col not in month_columns],
@@ -199,17 +154,65 @@ def upload_data():
     df_melted['Month_Num'] = df_melted['Month'].dt.month
     df_melted['Year'] = df_melted['Month'].dt.year
 
-    # Remove always-zero items before modeling
+    # remove always-zero items to separate list
     item_grouped = df_melted.groupby('ItemName')['Consumption'].sum()
     always_zero_items_list = item_grouped[item_grouped == 0].index.tolist()
     df_melted = df_melted[~df_melted['ItemName'].isin(always_zero_items_list)]
 
-    # Lag features
+    # create consumption lag features and drop NaNs produced for the first few months
     df_melted['Lag_1'] = df_melted.groupby('ItemName')['Consumption'].shift(1)
     df_melted['Lag_2'] = df_melted.groupby('ItemName')['Consumption'].shift(2)
     df_melted.dropna(subset=['Lag_1', 'Lag_2'], inplace=True)
+    
+    ######################################
+    # preprocessing GRN data
+    ######################################
 
-    # ========== Forecasting for Entire Dataset ==============
+    try:
+        df2 = pd.read_excel(goods_path, skiprows=9)
+    except Exception as e:
+        return f"Error reading goods file: {str(e)}", 400
+
+    # strip whitespaces from every column name
+    df2.columns = df2.columns.str.strip()
+
+    # drop summary rows based on nulls in important columns like Batch No (unique identifier)
+    cl2 = df2.dropna(subset=[
+        'Batch No', 'Item Name', 'Challan No./ Date :', 'PO No. / Date :', 'PO Unit Rate'
+    ])
+
+    # drop 'Unnamed' columns from xlsx formatting
+    cl2 = cl2.loc[:, ~cl2.columns.str.contains('^Unnamed')]
+
+    # drop redundant, less meaningful, one value and all empty columns
+    cl2 = cl2.drop(columns=[
+        "Rate", "Free Qty.", "Status", "Unit Name", "GRN type", "GIR No.", 
+        "Disc. %", "Disc. Amt", "VAT%", "VAT"
+    ], errors='ignore')
+
+    # standardize injectables in 'Sub Category'
+    cl2['Sub Category'] = cl2['Sub Category'].replace(
+        ['INJ.', 'INJECTION'], 'INJECTABLES'
+    )
+
+    # split the 'No / Date' columns for Bill, PO and Challan
+    cl2[['Bill No', 'Bill Date']] = cl2['Bill No. / Date'].str.split(r' / ', n=1, expand=True)
+    cl2[['PO No', 'PO Date']] = cl2['PO No. / Date :'].str.split(r' / ', n=1, expand=True)
+    cl2[['Challan No', 'Challan Date']] = cl2['Challan No./ Date :'].str.split(r'\*/', n=1, expand=True)
+
+    # format date columns to datetime
+    date_columns = ['Bill Date', 'PO Date', 'Challan Date', 'Grn Date', 'Expiry Date']
+    for col in date_columns:
+        cl2[col] = pd.to_datetime(cl2[col], dayfirst=True, errors='coerce')
+
+    # drop original combo columns of No / Date
+    cl2.drop(columns=[
+        'Bill No. / Date', 'PO No. / Date :', 'Challan No./ Date :'
+    ], inplace=True)
+
+    ######################################
+    # Forecasting
+    ######################################
     feature_cols = ['Lag_1', 'Lag_2'] + ['SUSPENSION', 'SYRUP', 'INJECTABLES', 'TABLET', 'CAPSULE', 'DENTAL', 'IS_BOX']
     X = df_melted[feature_cols]
     y = df_melted['Consumption']
@@ -252,7 +255,9 @@ def upload_data():
     forecast_plot = base64.b64encode(buf.getvalue()).decode('utf8')
     plt.close()
     
-    # ------------------- Consumption by Product Type Chart -------------------
+    ######################################
+    # Consumption by Product Type Chart
+    ######################################
     categories = ['CAPSULE', 'DENTAL', 'INJECTABLES', 'SUSPENSION', 'SYRUP', 'TABLET']
     category_consumption = df_melted[categories].sum()
 
@@ -294,7 +299,9 @@ def upload_data():
     consumption_plot = base64.b64encode(buf.getvalue()).decode('utf8')
     plt.close()
 
-    # ------------------- Stock Status Distribution Pie Chart -------------------
+    ######################################
+    # Stock Status Distribution
+    ######################################
     df_melted['Months_Supply'] = df_melted['Current Stock'] / df_melted['Consumption'].replace(0, np.nan)
     df_melted['Stock_Status'] = np.where(
         df_melted['Months_Supply'] < 1, 'Low',
@@ -302,7 +309,7 @@ def upload_data():
     )
 
     plt.figure(figsize=(6, 6))
-    colors = ['#ffffff', '#7677c4', '#4DC8F2']  # Adjust your colors here
+    colors = ['#ffffff', '#7677c4', '#4DC8F2']
 
     counts = df_melted['Stock_Status'].value_counts()
     labels = counts.index
@@ -322,7 +329,7 @@ def upload_data():
         startangle=90,
         colors=colors,
         wedgeprops={'edgecolor': 'white'},
-        textprops={'color': 'black', 'weight': 'bold', 'fontsize': 10}  # ✅ Text inside
+        textprops={'color': 'black', 'weight': 'bold', 'fontsize': 10}
     )
 
     plt.tight_layout()
@@ -335,7 +342,9 @@ def upload_data():
     stock_status_plot = base64.b64encode(buf.getvalue()).decode('utf8')
     plt.close()
     
-    # ------------------- top 5 items by avg monthly consumption horizontal bar chart -------------------
+    ######################################
+    # top 5 items by avg monthly consumption 
+    ######################################
     avg_consumption = (
         df_melted.groupby('ItemName')['Consumption']
         .mean()
@@ -366,10 +375,11 @@ def upload_data():
     avg_consumption_plot = base64.b64encode(buf.getvalue()).decode('utf8')
     plt.close()
 
-     # ------------------- box vs non-box Box Plot -------------------
+    ######################################
+    # box vs non-box Box Plot
+    ######################################
      
     plt.figure(figsize=(8, 5))
-    # plt.figure(figsize=(7, 4))
     sns.boxplot(
         x='IS_BOX', 
         y='Consumption', 
@@ -402,9 +412,7 @@ def upload_data():
     return redirect("/forecasting")
 
 ######################################
-
 # Web pages and routing
-
 ######################################
 @app.route("/consumption")
 def consumption():
@@ -416,9 +424,252 @@ def consumption():
         box_vs_regular_plot=box_vs_regular_plot
     )
 
+######################################
+# Supply Chain Risk Dashboard
+######################################
 @app.route("/suppliers")
 def suppliers():
-    return render_template("dashboard_suppliers.html")
+    global cl2
+    global supplier_dependence_plot, delivery_delay_plot, expiry_risk_plot, itemvalue_vs_frequency_plot
+
+    if cl2 is None:
+        return render_template("dashboard_suppliers.html", kpis=None)
+    try:
+        ######################################
+        # KPI Calculations
+        ######################################
+        total_grns = cl2['Grn No'].nunique()
+        total_suppliers = cl2['Supplier Name'].nunique()
+        total_items = cl2['Item Name'].nunique()
+
+        total_item_value = cl2['Item Value'].sum()
+        avg_item_value_per_grn = total_item_value / total_grns if total_grns else 0
+        total_rec_qty = cl2['Rec. Qty.'].sum()
+
+        cl2['Lead_Time_Days'] = (cl2['Grn Date'] - cl2['Challan Date']).dt.days
+        avg_lead_time = cl2['Lead_Time_Days'].mean()
+
+        cl2['Days_to_Expiry'] = (cl2['Expiry Date'] - pd.Timestamp.today()).dt.days
+        near_expiry_batches = (cl2['Days_to_Expiry'] < 180).sum()
+
+        price_variance_cases = (cl2['Unit Cost'].round(2) != cl2['PO Unit Rate'].round(2)).sum()
+
+        grn_monthly = cl2.groupby(cl2['Grn Date'].dt.to_period('M')).size()
+        avg_grns_per_month = grn_monthly.mean()
+
+        kpis = {
+            'Total GRNs Processed': total_grns,
+            'Total Unique Suppliers': total_suppliers,
+            'Total Item Value (Procured)': round(total_item_value, 2),
+            'Average Lead Time (Days)': round(avg_lead_time, 2),
+            'Near-Expiry Batches (<180 days)': int(near_expiry_batches),
+            'Average GRNs Per Month': round(avg_grns_per_month, 2)
+        }
+        
+        ######################################
+        # Supplier Dependence
+        ######################################
+        delayed_suppliers = (
+            cl2.groupby('Supplier Name')['Lead_Time_Days']
+            .mean()
+            .loc[lambda x: x > 0]
+            .index.tolist()
+        )
+
+        supplier_value = cl2.groupby('Supplier Name')['Item Value'].sum().sort_values(ascending=False)
+        supplier_share = supplier_value / supplier_value.sum() * 100
+        top_suppliers = supplier_share.head(10)
+
+        colors1 = ['#4DC8F2' if supplier in delayed_suppliers else 'yellow' for supplier in top_suppliers.index]
+
+        plt.figure(figsize=(6, 4))
+        top_suppliers.plot(kind='barh', color=colors1)
+
+        plt.xlabel('% of Total Item Value', color='white')
+        plt.ylabel('Supplier Name', color='white')
+
+        plt.xticks(color='white')
+        plt.yticks(color='white')
+
+        plt.gca().invert_yaxis()
+
+        plt.gca().spines['bottom'].set_color('white')
+        plt.gca().spines['left'].set_color('white')
+        plt.gca().spines['top'].set_color('white')
+        plt.gca().spines['right'].set_color('white')
+
+        plt.gca().tick_params(colors='white')
+
+        # Transparent background
+        plt.gca().set_facecolor('none')
+        plt.gcf().set_facecolor('none')
+
+        plt.tight_layout()
+
+        buf1 = io.BytesIO()
+        plt.savefig(buf1, format='png', transparent=True)
+        buf1.seek(0)
+        supplier_dependence_plot = base64.b64encode(buf1.getvalue()).decode('utf8')
+        plt.close()
+        
+        ######################################
+        # Delivery Delay
+        ######################################
+        delivery_delay_supplier = (
+            cl2.groupby('Supplier Name')['Lead_Time_Days']
+            .mean()
+            .loc[lambda x: x > 0]
+            .sort_values(ascending=False)
+        )
+
+        colors2 = ['#4DC8F2' if supplier in top_suppliers.index else 'firebrick' for supplier in delivery_delay_supplier.index]
+
+        plt.figure(figsize=(6, 4))
+        delivery_delay_supplier.plot(kind='barh', color=colors2)
+
+        plt.xlabel('Average Delivery Delay (Days)', color='white')
+        plt.ylabel('Supplier Name', color='white')
+
+        plt.xticks(color='white')
+        plt.yticks(color='white')
+
+        plt.gca().invert_yaxis()
+
+        plt.gca().spines['bottom'].set_color('white')
+        plt.gca().spines['left'].set_color('white')
+        plt.gca().spines['top'].set_color('white')
+        plt.gca().spines['right'].set_color('white')
+
+        plt.gca().tick_params(colors='white')
+
+        plt.gca().set_facecolor('none')
+        plt.gcf().set_facecolor('none')
+
+        plt.tight_layout()
+
+        buf2 = io.BytesIO()
+        plt.savefig(buf2, format='png', transparent=True)
+        buf2.seek(0)
+        delivery_delay_plot = base64.b64encode(buf2.getvalue()).decode('utf8')
+        plt.close()
+        
+        ######################################
+        # Expiry Risk
+        ######################################
+        cl2['Days_to_Expiry_Today'] = (cl2['Expiry Date'] - pd.Timestamp.today()).dt.days
+        cl2['Expiry_Risk'] = pd.cut(
+            cl2['Days_to_Expiry_Today'],
+            bins=[-9999, 0, 90, 180, 365, 9999],
+            labels=['Expired', '<3 Months', '3-6 Months', '6-12 Months', '>1 Year']
+        )
+
+        expiry_risk_subcat = cl2.groupby(['Sub Category', 'Expiry_Risk'])['Item Value'].sum().unstack().fillna(0)
+
+        top6_subcats = expiry_risk_subcat.sum(axis=1).sort_values(ascending=False).head(6).index
+        expiry_risk_top6 = expiry_risk_subcat.loc[top6_subcats]
+
+        color_map = {
+            'Expired': '#d62728',
+            '<3 Months': '#4C72B0',
+            '3-6 Months': '#4DC8F2',
+            '6-12 Months': '#B6AED4',
+            '>1 Year': '#ffffff'
+        }
+
+        ax = expiry_risk_top6.plot(
+            kind='bar',
+            stacked=True,
+            figsize=(8, 6),
+            color=[color_map.get(x, '#333333') for x in expiry_risk_top6.columns]
+        )
+
+        ax.set_ylabel('Total Item Value', color='white')
+        ax.set_xlabel('Sub Category', color='white')
+        ax.tick_params(axis='x', colors='white')
+        ax.tick_params(axis='y', colors='white')
+
+        plt.xticks(rotation=45, ha='right')
+        plt.tight_layout()
+
+        buf3 = io.BytesIO()
+        plt.savefig(buf3, format='png', transparent=True)
+        buf3.seek(0)
+        expiry_risk_plot = base64.b64encode(buf3.getvalue()).decode('utf8')
+        plt.close()
+
+        ######################################
+        # Subcategory with ItemValue n Frequency
+        ######################################
+        top_subcat_item_value = cl2.groupby('Sub Category')['Item Value'].sum().sort_values(ascending=False).head(10)
+        top_subcat_counts = cl2['Sub Category'].value_counts().reindex(top_subcat_item_value.index)
+
+        fig, ax1 = plt.subplots(figsize=(8, 5))
+
+        color1 = '#4DC8F2'
+        color2 = '#B6AED4'
+
+        ax1.bar(top_subcat_item_value.index, top_subcat_item_value.values, color=color1, width=0.4, align='center')
+        ax1.set_xlabel('Sub Category', color='white')
+        ax1.set_ylabel('Total Item Value', color=color1)
+        ax1.tick_params(axis='y', labelcolor=color1)
+        ax1.tick_params(axis='x', colors='white')
+        ax1.set_xticks(range(len(top_subcat_item_value.index)))
+        ax1.set_xticklabels(top_subcat_item_value.index, rotation=45, ha='right', color='white')
+
+        ax2 = ax1.twinx()
+        ax2.bar([i + 0.4 for i in range(len(top_subcat_counts))], top_subcat_counts.values,
+                color=color2, width=0.4, align='center')
+        ax2.set_ylabel('Frequency', color=color2)
+        ax2.tick_params(axis='y', labelcolor=color2)
+
+        plt.tight_layout()
+
+        buf4 = io.BytesIO()
+        plt.savefig(buf4, format='png', transparent=True)
+        buf4.seek(0)
+        itemvalue_vs_frequency_plot = base64.b64encode(buf4.getvalue()).decode('utf8')
+        plt.close()
+        
+        ######################################
+        # Table for Items Expiring in <3 Months
+        ######################################
+
+        expiry_3_months = cl2[(cl2['Expiry_Risk'] == '<3 Months') & (cl2['Days_to_Expiry_Today'] >= 0)]
+
+        expiry_display = expiry_3_months[[
+            'Item Name', 'Sub Category', 'Supplier Name', 'Batch No',
+            'Expiry Date', 'Days_to_Expiry_Today', 'Item Value'
+        ]].sort_values('Days_to_Expiry_Today').reset_index(drop=True)
+
+        expiry_display['Days_to_Expiry_Today'] = expiry_display['Days_to_Expiry_Today'].astype(int)
+        expiry_display['Item Value'] = expiry_display['Item Value'].round(2)
+
+        # Converting to HTML table
+        expiry_table_html = expiry_display.to_html(
+            classes='table table-striped table-bordered table-hover expiry-table',
+            index=False,
+            border=0,
+            justify='center'
+        )
+
+    except Exception as e:
+        print(f"KPI Calculation Error: {e}")
+        kpis = None
+        supplier_dependence_plot = None
+        delivery_delay_plot = None
+        expiry_risk_plot = None
+        itemvalue_vs_frequency_plot = None
+        
+    return render_template(
+        "dashboard_suppliers.html",
+        kpis=kpis,
+        supplier_dependence_plot=supplier_dependence_plot,
+        delivery_delay_plot=delivery_delay_plot,
+        expiry_risk_plot=expiry_risk_plot,
+        itemvalue_vs_frequency_plot=itemvalue_vs_frequency_plot,
+        expiry_table=expiry_table_html
+    )
+
 
 @app.route("/forecasting")
 def forecasting():
@@ -439,10 +690,9 @@ def forecasting():
         date_range=date_range_str
     )
 
-
-
-
-# FUNCTION TO TRAIN AND TEST ALL TOP 5 MODELS FROM JNOTE    
+######################################
+# FUNCTION TO TRAIN AND TEST ALL TOP 5 MODELS FROM JNOTE   
+###################################### 
 def evaluate_models(X_train, X_test, y_train, y_test, feature_set_label):
     results = []
     models = {
@@ -476,38 +726,36 @@ def evaluate_models(X_train, X_test, y_train, y_test, feature_set_label):
             "RMSE/Mean": rmse / y_mean if y_mean != 0 else None,
             "RMSE/Std": rmse / y_std if y_std != 0 else None
         })
-        results = sorted(results, key=lambda x: x['Time (s)'])  # Fastest model first
+        results = sorted(results, key=lambda x: x['Time (s)'])  # fastest model on top
     return results
 
+######################################
 # FORECASTING UPCOMING 3 MONTHS FOR TOP 5 ITEMS USING RIDGE REGRESSION
+######################################
 def generate_forecast(df_melted, model, feature_cols):
-    # latest month from data
-    latest_month = df_melted['Month'].max()
-
-    # Generate next 3 months dynamically
-    forecast_months = pd.date_range(start=latest_month + pd.DateOffset(months=1), periods=3, freq='MS')
+    latest_month = df_melted['Month'].max() # latest month from data
+    forecast_months = pd.date_range(start=latest_month + pd.DateOffset(months=1), periods=3, freq='MS') # dynamic next 3 months
 
     forecast_rows = []
 
-    # the latest available data for each item
-    latest_df = df_melted[df_melted['Month'] == latest_month].copy()
+    latest_df = df_melted[df_melted['Month'] == latest_month].copy() # the latest data per item
 
-    # Loop per each forecast month
+    # Loop per forecast month
     for forecast_month in forecast_months:
         latest_df['Month'] = forecast_month
 
-        # input features
+        # features columns
         X_future = latest_df[feature_cols]
-        # Make predictions
+        # predictions
         latest_df['Predicted_Consumption'] = model.predict(X_future)
-        # Save results for this month
+        # Saving results for this month
         forecast_rows.append(latest_df[['ItemName', 'Month', 'Predicted_Consumption']].copy())
 
-        # Updating lags for the next prediction month otherwise error
+        # update lags for the next prediction month otherwise error
         latest_df['Lag_2'] = latest_df['Lag_1']
         latest_df['Lag_1'] = latest_df['Predicted_Consumption']
 
-    # Combine forecast results into one df
+    # combine forecast results into one df
     forecast_df = pd.concat(forecast_rows, ignore_index=True)
     forecast_df.rename(columns={'Predicted_Consumption': 'Value'}, inplace=True)
     forecast_df['Source'] = 'Forecast'
@@ -524,18 +772,18 @@ def generate_forecast(df_melted, model, feature_cols):
 
     return plot_df, forecast_months
 
+######################################
 # FORECASTING OVERALL DEMAND
+######################################
 def generate_overall_forecast_plot(df_melted):
     global forecast_months
 
-    # Aggregate total consumption per month
+    # total consumption per month
     overall_df = df_melted.groupby('Month')['Consumption'].sum().reset_index()
-
-    # Create lag features
+    # lag features
     overall_df['Lag_1'] = overall_df['Consumption'].shift(1)
     overall_df['Lag_2'] = overall_df['Consumption'].shift(2)
     overall_df = overall_df.dropna()
-
     # Train Ridge Regression on total consumption
     X = overall_df[['Lag_1', 'Lag_2']]
     y = overall_df['Consumption']
@@ -543,7 +791,7 @@ def generate_overall_forecast_plot(df_melted):
     model = Ridge(alpha=1.0)
     model.fit(X, y)
 
-    # Get latest lags
+    # latest lags
     latest_month = overall_df['Month'].max()
     lag_1 = overall_df.loc[overall_df['Month'] == latest_month, 'Lag_1'].values[0]
     lag_2 = overall_df.loc[overall_df['Month'] == latest_month, 'Lag_2'].values[0]
@@ -563,7 +811,6 @@ def generate_overall_forecast_plot(df_melted):
 
     forecast_df = pd.DataFrame(forecast_results)
 
-    # Plot
     plt.figure(figsize=(10, 5))
     plt.plot(overall_df['Month'], overall_df['Consumption'], marker='o', label='Historical')
     plt.plot(forecast_df['Month'], forecast_df['Consumption'], marker='o', linestyle='--', label='Forecast')
@@ -585,6 +832,9 @@ def generate_overall_forecast_plot(df_melted):
 
 from flask import send_file
 
+######################################
+# Download inactive items for inventory check
+######################################
 @app.route("/download-zero-items")
 def download_zero_items():
     if not always_zero_items_list:
@@ -606,12 +856,10 @@ def data_entry():
 def dataset():
     return render_template("dataset.html")
 
-# @app.route("/performance")
-# def performance():
-#     return render_template("performance.html")
-
+######################################
 # RUNNER and DEBUGGER
 # Keep Flask updating itself
+######################################
 if __name__ == "__main__":      
     app.run(debug=True)
 

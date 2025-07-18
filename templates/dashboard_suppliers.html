@@ -1,8 +1,59 @@
 {% extends 'base.html' %}
 
-{% block title %}Suppliers Overview{% endblock %}
+{% block title %}Supply Chain Risks{% endblock %}
 
 {% block body %}
-  <h1>Suppliers Overview</h1>
-  <p>This is the suppliers dashboard.</p>
+  <h1>Supply Chain Risk Dashboard</h1>
+  <p>This is the dashboard highlighting key supply chain risks and insights from the Supplier-wise Goods Received Notice (GRN) Data. It can be used to highlight supplier risks, delivery delays, expiry risks and item value based risks.</p>
+
+  <div class="kpi-container">
+    {% if kpis %}
+      {% for key, value in kpis.items() %}
+        <div class="kpi-card">
+          <h3>{{ key }}</h3>
+          <p>{{ value }}</p>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="kpi-placeholder">
+        <p style="color: white; font-weight: bold;">
+          No data loaded. Please upload the data to view Dashboard.
+        </p>
+      </div>
+    {% endif %}
+  </div>
+
+{% if supplier_dependence_plot and delivery_delay_plot %}
+  <div class="plot-container">
+    <div class="plot-card">
+      <h2>Top 10 Supplier Dependence</h2>
+      <img src="data:image/png;base64,{{ supplier_dependence_plot }}" alt="Supplier Dependence Plot">
+    </div>
+    <div class="plot-card">
+      <h2>Suppliers with Delivery Delays</h2>
+      <img src="data:image/png;base64,{{ delivery_delay_plot }}" alt="Delivery Delay Plot">
+    </div>
+  </div>
+{% endif %}
+
+{% if expiry_risk_plot and itemvalue_vs_frequency_plot %}
+  <div class="expiry-row">
+    <div class="plot-card-1">
+      <h2>Expiry Risk by Sub Category (Top 6)</h2>
+      <img src="data:image/png;base64,{{ expiry_risk_plot }}" alt="Expiry Risk Plot">
+    </div>
+
+    <div class="plot-card-2">
+      <h2>Item Value and Frequency by Sub Category (Top 10)</h2>
+      <img src="data:image/png;base64,{{ itemvalue_vs_frequency_plot }}" alt="Item Value vs Frequency Plot">
+    </div>
+  </div>
+{% endif %}
+
+<div class="table-section">
+    <h2>Items Expiring in Less Than 3 Months</h2>
+    {{ expiry_table|safe }}
+</div>
+
+
 {% endblock %}
