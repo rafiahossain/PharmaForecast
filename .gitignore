@@ -8,7 +8,7 @@ env/
 # Flask instance and DB
 *.db
 *.xlsx
-*.txt
+/uploads/*.txt
 .env
 *.png
 
