@@ -10,7 +10,7 @@ env/
 *.xlsx
 /uploads/*.txt
 .env
-*.png
+/static/images/*.png
 
 # IDE/project configs
 .vscode/
