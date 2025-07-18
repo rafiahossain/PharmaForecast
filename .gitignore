@@ -9,8 +9,6 @@ env/
 instance/
 pharmaDB.db
 uploads/
-Consumption_Month_Item_Wise.xlsx
-GRN_DATA.xlsx
 *.xlsx
 .env
 
